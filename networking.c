@@ -6,7 +6,6 @@
 #include <sys/stat.h>
 #include <string.h>
 #include <errno.h>
-#include <signal.h>
 #include <sys/wait.h>
 #include <sys/socket.h> 
 #include <netdb.h>
@@ -42,10 +41,12 @@ int server_setup() {
 }
 
 int server_tcp_handshake(int listen_socket) {
-  return accept(listen_socket, NULL, NULL);
+  int client_socket = accept(listen_socket, NULL, NULL);
+
+  return client_socket;
 }
 
-int client_tcp_handshape(char *server_addr) {
+int client_tcp_handshake(char *server_addr) {
   struct addrinfo *hints, *results;
   hints = malloc(sizeof(struct addrinfo));
   hints->ai_family = AF_INET;
