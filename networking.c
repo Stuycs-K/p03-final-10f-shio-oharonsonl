@@ -1,4 +1,22 @@
-#include <sys/socket.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <string.h>
+#include <errno.h>
+#include <signal.h>
+#include <sys/wait.h>
+#include <sys/socket.h> 
+#include <netdb.h>
+
+void err(int i, char *msg) {
+  if (i < 0) {
+    printf("Error: %s - %s\n", msg, strerror(errno));
+    exit(1);
+  }
+}
 
 int server_setup() {
   struct addrinfo *hints, *results;
@@ -12,7 +30,7 @@ int server_setup() {
       socket(results->ai_family, results->ai_socktype, results->ai_protocol);
 
   int yes = 1;
-  int sockOpt = setsockopt(clientd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
+  int sockOpt = setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
   err(sockOpt, "sockopt  error");
 
   bind(server_socket, results->ai_addr, results->ai_addrlen);
@@ -32,7 +50,7 @@ int client_tcp_handshape(char *server_addr) {
   hints = malloc(sizeof(struct addrinfo));
   hints->ai_family = AF_INET;
   hints->ai_socktype = SOCK_STREAM;
-  getaddrinfo(server_address, "43267", hints, &results);
+  getaddrinfo(server_addr, "43267", hints, &results);
 
   int server_socket = socket(results->ai_family, results->ai_socktype, results->ai_protocol);
   connect(server_socket, results->ai_addr, results->ai_addrlen);
@@ -43,9 +61,4 @@ int client_tcp_handshape(char *server_addr) {
   return server_socket;
 }
 
-void err(int i, char *msg) {
-  if (i < 0) {
-    printf("Error: %s - %s\n", message, strerror(errno));
-    exit(1);
-  }
-}
+
