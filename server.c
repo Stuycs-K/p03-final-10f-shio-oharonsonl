@@ -1,10 +1,12 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <unistd.h>
 #include "networking.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 
-void subserver_logic() {
+void subserver_logic(int client_socket) {
   // ...
+
+  exit(0); // Must exit the fork
 }
 
 int main() {
@@ -12,7 +14,7 @@ int main() {
 
   while (1) {
     int client_socket = server_tcp_handshake(server_socket);
-    printf("A CLIENT HAS BEEN CONNECTED");
+    printf("A CLIENT HAS BEEN CONNECTED\n");
 
     int subserver = fork();
 

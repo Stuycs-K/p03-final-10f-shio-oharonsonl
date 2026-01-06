@@ -4,9 +4,9 @@ server-run: server
 client-run: client
 	@./client
 server-compile server: server.o networking.o
-	@gcc -o server server.o
-client-compile: client.o networking.o
-	@gcc -o client client.o
+	@gcc -o server server.o networking.o
+client-compile client: client.o networking.o
+	@gcc -o client client.o networking.o
 networking.o: networking.c networking.h
 	@gcc -c networking.c
 client.o: client.c networking.h
