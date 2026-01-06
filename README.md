@@ -1,13 +1,15 @@
 [![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/QfAIDTGi)
-# PROJECT NAME HERE (CHANGE THIS!!!!!)
+# Tournament Connect 4
  
-### GROUP NAME HERE (CHANGE THIS!!!!!)
+### OH—WHEN?
 
-Group Members Here (CHANGE THIS!!!!!)
+Owen Shi & Louis Oh-Aronson
        
 ### Project Description:
 
-Explain what is this project. (CHANGE THIS!!!!!)
+This is a Connect 4 game with 8 players. The players will be seperated off into
+tournament brackets and compete against one another in rounds for a final
+winner!
   
 ### Instructions:
 
