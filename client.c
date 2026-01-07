@@ -1,6 +1,4 @@
 #include "networking.h"
-#include <stdio.h>
-#include <stdlib.h>
 
 void client_logic(int server_socket) {
   // ...
@@ -20,8 +18,8 @@ int main(int argc, char *argv[]) {
     char * buffer = malloc(BUFFER_SIZE);
     fgets(buffer, BUFFER_SIZE, stdin);
     if(!strcmp(buffer, "y")){
+      err(send(server_socket,"1",strlen(to_server),0), "issue sending ready message to server");
       break;
-
     }
     if(!strcmp(buffer,"exit")){
       exit(0);

@@ -1,7 +1,4 @@
 #include "networking.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
 
 void subserver_logic(int client_socket) {
   // ...
