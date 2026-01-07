@@ -3,7 +3,10 @@
 #include <stdlib.h>
 
 void client_logic(int server_socket) {
-  // ...
+  char id[4];
+  recv(server_socket, id, sizeof(id), 0); // this is blocking
+
+  printf("Recieved: %s", buf);
 }
 
 int main(int argc, char *argv[]) {
