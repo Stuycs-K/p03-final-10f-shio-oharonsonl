@@ -17,17 +17,19 @@ games and sending the messages back to the clients to display. It'll go back and
 # Technical Details:
 
 We’ll use sockets to connect 8 players, then use process control (fork/wait) to run matches while the main server keeps the bracket moving. We’ll use
-dynamic memory to store player info, boards, and bracket state, and use signals (like SIGCHLD) to clean up finished match processes and handle disconnects cleanly.
+dynamic memory and semaphores to store player info, boards, and bracket state, and use signals (like SIGCHLD) to clean up finished match processes and handle disconnects cleanly.
 
 # Intended pacing:
 
 Initial forking setup (Jan. 7th) - Owen
 
-Bracket logic & game assignments (Jan. 10th) - Owen
+Semaphore setup so that players can "ready up" (Jan 7th) - Louis
+
+Bracket logic & game assignments (Jan. 12th) - Owen
 
 Player waiting screen (Jan 9th) - Louis
 
-Game functionality (Jan 7th) - Louis
+Game functionality (Jan 12th) - Louis
 
 Merge game with tournament server (Jan 12th) - Louis
 
