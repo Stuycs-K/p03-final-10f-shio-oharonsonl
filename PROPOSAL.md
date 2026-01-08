@@ -23,7 +23,7 @@ dynamic memory and semaphores to store player info, boards, and bracket state, a
 
 Initial forking setup (Jan. 7th) - Owen
 
-Semaphore setup so that players can "ready up" (Jan 7th) - Louis
+server-client messaging so that players can "ready up" (Jan 9th) - Louis
 
 Bracket logic & game assignments (Jan. 12th) - Owen
 
