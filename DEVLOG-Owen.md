@@ -17,3 +17,8 @@ the server. Need to figure out how the server will communicate with each, etc. R
 how to share variables and datatypes between clients (will probably have to used
 shared memory and semaphores?). Theory: Shared memory on the computer running
 the server so all processes can get "global variables."
+
+### 2026-01-08 - Contiuing tournament work, communication between forks.
+
+Starting work with semaphores and shared memory to know when all clients are
+ connected.
