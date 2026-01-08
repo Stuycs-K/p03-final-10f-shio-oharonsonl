@@ -25,13 +25,15 @@ Initial forking setup (Jan. 7th) - Owen
 
 Bracket logic & game assignments (Jan. 10th) - Owen
 
+Shared memory, semaphores, and communication between forked servers - Owen
+
 Player waiting screen (Jan 9th) - Louis
 
 Game functionality (Jan 7th) - Louis
 
 Merge game with tournament server (Jan 12th) - Louis
 
-Player resign, draw request through signals? (Jan 15th)  - Owen and Louis
+Player resign, draw request through signals? (Jan 15th) - Owen and Louis
 
 Bug fixes (Jan 15th) - Owen and Louis
 
