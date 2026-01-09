@@ -6,15 +6,28 @@
 void subserver_logic(int client_socket) {
   // ...
 
+  //wait to get the ready signal from client, figure that out soon
+
+  //once ready, set up semaphore + shm and write into it, then close and put semaphore down
+
+
   exit(0); // Must exit the fork
 }
 
 int main() {
   int server_socket = server_setup();
 
+  //set up semaphore
+  int semid = semget(SEMKEY, 1, IPC_CREAT | IPC_EXCL | 0664);
+  union semun u;
+  u.val = 1;
+  int r = semctl(semid,0,SETVAL,u);
+
+
+  //set up shm
   int *data;
   int shmid;
-  shmid = shmget(SHMKEY, MAX_PLAYERS*sizeof(int) + 1, IPC_CREAT | 0644);
+  shmid = shmget(SHMKEY, MAX_PLAYERS*sizeof(int) + 1, IPC_CREAT | 0664);
   data = shmat(shmid, 0, 0);
   //0 out array to be 100% sure that players will be ready
   for(int i = 0; i < MAX_PLAYERS + 1; i++){
@@ -51,7 +64,8 @@ int main() {
     }
   }
 
-  //once all players are ready parent closes + deletes shared memory
+  //once all players are ready parent closes + deletes shared memory and semaphore
   shmdt(data);
   shmctl(shmid, IPC_RMID, 0);
+  semctl(semid,IPC_RMID,0);
 }

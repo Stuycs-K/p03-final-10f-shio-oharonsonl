@@ -10,6 +10,7 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <sys/shm.h>
+#include <sys/sem.h>
 #include <sys/ipc.h>
 
 #ifndef NETWORKING_H
@@ -23,3 +24,13 @@ void err(int i, char * msg);
 #endif
 
 #define BUFFER_SIZE 128
+
+#ifndef SEMUN_DEFINED
+#define SEMUN_DEFINED
+  union semun{
+    int val;
+    struct semid_ds *buf;
+    unsigned short *array;
+    struct seminfo *__buf;
+  };
+#endif
