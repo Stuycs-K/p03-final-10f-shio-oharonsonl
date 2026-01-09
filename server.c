@@ -3,13 +3,40 @@
 #define SHMKEY 67694200
 #define SEMKEY 67674201
 
-void subserver_logic(int client_socket) {
+void subserver_logic(int client_socket, int index) {
   // ...
 
-  //wait to get the ready signal from client, figure that out soon
+  //wait to get the ready signal from client, will figure that out soon
 
   //once ready, set up semaphore + shm and write into it, then close and put semaphore down
+  int semid;
+  int shmid;
+  semid = semget(SEMKEY, 1, 0);
+  struct sembuf sb;
+  sb.sem_num = 0;
+  sb.sem_flg = SEM_UNDO;
+  sb.sem_op = -1;
+  semop(semid, &sb, 1);
 
+  shmid = shmget(SHMKEY, 0, 0);
+  int *data;
+  data = shmat(shmid, 0, 0);
+  data[index] = 1;
+
+  sb.sem_op = 1;
+  err(semop(semid, &sb, 1), "[child] had problem releasing semaphore");
+
+  //then, have the child repeatedly check to see if everyone is ready
+  while(1){
+    sb.sem_op = -1;
+    semop(semid, &sb, 1);
+    if(data[MAX_PLAYERS] == 1)break;
+    sb.sem_op = 1;
+    err(semop(semid, &sb, 1), "[child] had problem releasing semaphore");
+    wait(1);
+  }
+
+  shmdt(data);
 
   exit(0); // Must exit the fork
 }
@@ -33,6 +60,7 @@ int main() {
     data[i] = 0;
   }
 
+  int actives_index = 0;
   while (1) {
     int client_socket = server_tcp_handshake(server_socket);
     printf("A CLIENT HAS  CONNECTED\n");
@@ -44,8 +72,12 @@ int main() {
       exit(1);
     }
 
-    else if (subserver == 0)
-      subserver_logic(client_socket);
+    else if (subserver == 0){
+      subserver_logic(client_socket, actives_index);
+      actives_index++;
+    }
+
+    if(actives == MAX_PLAYERS-1)break;
   }
 
   while(1){
@@ -67,7 +99,7 @@ int main() {
       wait(1);
       //temporarily release semaphore
       sb.sem_op = 1;
-      err(semop(semid, &sb, 1), "problem releasing semaphore");
+      err(semop(semid, &sb, 1), "[parent] had problem releasing semaphore");
     }
   }
 
