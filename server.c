@@ -23,7 +23,6 @@ int main() {
   u.val = 1;
   int r = semctl(semid,0,SETVAL,u);
 
-
   //set up shm
   int *data;
   int shmid;
@@ -50,6 +49,11 @@ int main() {
   }
 
   while(1){
+    struct sembuf sb;
+    sb.sem_num = 0;
+    sb.sem_flg = SEM_UNDO;
+    sb.sem_op = -1;
+    semop(semid, &sb, 1);
     int readies = 0;
     for(int i = 0; i < MAX_PLAYERS; i++){
       if(data[i] == 1)readies++;
@@ -61,6 +65,9 @@ int main() {
     else{
       printf("Not all players are ready\n");
       wait(1);
+      //temporarily release semaphore
+      sb.sem_op = 1;
+      err(semop(semid, &sb, 1), "problem releasing semaphore");
     }
   }
 
