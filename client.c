@@ -27,5 +27,10 @@ int main(int argc, char *argv[]) {
     sleep(1);
   }
 
+  printf("You have readied!\n");
+  while(1){
+    //will fill in with code waiting to get the ready signal from the server
+  }
+
   client_logic(server_socket);
 }
