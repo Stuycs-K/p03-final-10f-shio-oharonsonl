@@ -21,4 +21,13 @@ the server so all processes can get "global variables."
 ### 2026-01-08 - Contiuing tournament work, communication between forks.
 
 Starting work with semaphores and shared memory to know when all clients are
- connected.
+connected. Looking back at old labs and just trying to remember how shared memory works
+again. Have basic code structure down, but tomorrow I'll have to debug heavily.
+
+### 2026-01-09
+
+Debugged everything and game waiting feature works! All the subservers now all communicate properly
+with each other until the desired player count (8) is reached via usage of semaphores and
+shared memory. I used recv()'s blocking functionality to streamline waiting and plan
+to use it in the future for sending game states. Continued to communicate with Louis on
+readying and the actual game.
