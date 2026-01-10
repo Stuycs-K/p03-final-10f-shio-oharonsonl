@@ -4,10 +4,14 @@
 #include <sys/socket.h>
 
 void client_logic(int server_socket) {
-  char id[4];
-  recv(server_socket, id, sizeof(id), 0); // this is blocking
+  char id;
+  recv(server_socket, &id, sizeof(char), 0); // this is blocking
 
-  printf("Recieved: %s", id);
+  printf("Recieved: %c\n", id);
+  recv(server_socket, NULL, sizeof(char), 0);
+
+  printf("GAME STARTS NOW! You are player %c\n", id);
+  // game logic
 }
 
 int main(int argc, char *argv[]) {
