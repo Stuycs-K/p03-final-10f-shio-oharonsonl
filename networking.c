@@ -1,4 +1,21 @@
-#include "networking.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <string.h>
+#include <errno.h>
+#include <sys/wait.h>
+#include <sys/socket.h> 
+#include <netdb.h>
+
+void err(int i, char *msg) {
+  if (i < 0) {
+    printf("Error: %s - %s\n", msg, strerror(errno));
+    exit(1);
+  }
+}
 
 int server_setup() {
   struct addrinfo *hints, *results;
@@ -44,3 +61,5 @@ int client_tcp_handshake(char *server_addr) {
 
   return server_socket;
 }
+
+

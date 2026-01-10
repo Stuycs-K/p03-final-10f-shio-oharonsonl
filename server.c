@@ -1,110 +1,72 @@
 #include "networking.h"
-#define MAX_PLAYERS 8
-#define SHMKEY 67694200
-#define SEMKEY 67674201
+#include "sema.h"
+#include <signal.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/ipc.h>
+#include <sys/sem.h>
+#include <sys/shm.h>
+#include <sys/socket.h>
+#include <unistd.h>
 
-void subserver_logic(int client_socket, int index) {
-  // ...
+void subserver_logic(int client_socket, char *id) {
+  send(client_socket, id, sizeof(id), 0); // send the client's id
 
-  //wait to get the ready signal from client, will figure that out soon
+  int sema = semget(KEY, 1, 0);
+  while (semctl(sema, 0, GETVAL) == 1)
+    ; // wait until 8 clients
 
-  //once ready, set up semaphore + shm and write into it, then close and put semaphore down
-  int semid;
-  int shmid;
-  semid = semget(SEMKEY, 1, 0);
-  struct sembuf sb;
-  sb.sem_num = 0;
-  sb.sem_flg = SEM_UNDO;
-  sb.sem_op = -1;
-  semop(semid, &sb, 1);
-
-  shmid = shmget(SHMKEY, 0, 0);
-  int *data;
-  data = shmat(shmid, 0, 0);
-  data[index] = 1;
-
-  sb.sem_op = 1;
-  err(semop(semid, &sb, 1), "[child] had problem releasing semaphore");
-
-  //then, have the child repeatedly check to see if everyone is ready
-  while(1){
-    sb.sem_op = -1;
-    semop(semid, &sb, 1);
-    if(data[MAX_PLAYERS] == 1)break;
-    sb.sem_op = 1;
-    err(semop(semid, &sb, 1), "[child] had problem releasing semaphore");
-    wait(1);
-  }
-
-  shmdt(data);
+  send(client_socket, "1", sizeof(char), 0); // tell clients game has started
 
   exit(0); // Must exit the fork
 }
 
+// remove shared memory on quit
+static void sighandler(int signo) {
+  if (signo == SIGINT) {
+    int shmid = shmget(KEY, sizeof(int), 0);
+    int sema = semget(KEY, 1, 0);
+
+    shmctl(shmid, IPC_RMID, 0);
+    semctl(sema, IPC_RMID, 0);
+    exit(1);
+  }
+}
+
 int main() {
+  signal(SIGINT, sighandler);
   int server_socket = server_setup();
 
-  //set up semaphore
-  int semid = semget(SEMKEY, 1, IPC_CREAT | IPC_EXCL | 0664);
-  union semun u;
-  u.val = 1;
-  int r = semctl(semid,0,SETVAL,u);
+  int mem_id = shmget(KEY, sizeof(char), IPC_CREAT | 0664);
+  int sema = semget(KEY, 1, IPC_CREAT | IPC_EXCL | 0664);
 
-  //set up shm
-  int *data;
-  int shmid;
-  shmid = shmget(SHMKEY, MAX_PLAYERS*sizeof(int) + 1, IPC_CREAT | 0664);
-  data = shmat(shmid, 0, 0);
-  //0 out array to be 100% sure that players will be ready
-  for(int i = 0; i < MAX_PLAYERS + 1; i++){
-    data[i] = 0;
-  }
+  union semun us;
+  us.val = 1;
+  semctl(sema, 0, SETVAL, us);
 
-  int actives_index = 0;
-  while (1) {
+  int clients = 0;
+  while (clients < 8) {
     int client_socket = server_tcp_handshake(server_socket);
-    printf("A CLIENT HAS  CONNECTED\n");
+    printf("A CLIENT HAS BEEN CONNECTED\n");
+    clients++;
 
     int subserver = fork();
-
     if (subserver == -1) {
       perror("fork");
       exit(1);
     }
 
-    else if (subserver == 0){
-      subserver_logic(client_socket, actives_index);
-      actives_index++;
-    }
-
-    if(actives == MAX_PLAYERS-1)break;
-  }
-
-  while(1){
-    struct sembuf sb;
-    sb.sem_num = 0;
-    sb.sem_flg = SEM_UNDO;
-    sb.sem_op = -1;
-    semop(semid, &sb, 1);
-    int readies = 0;
-    for(int i = 0; i < MAX_PLAYERS; i++){
-      if(data[i] == 1)readies++;
-    }
-    if(readies==MAX_PLAYERS){
-      data[MAX_PLAYERS] = 1;
-      break;
-    }
-    else{
-      printf("Not all players are ready\n");
-      wait(1);
-      //temporarily release semaphore
-      sb.sem_op = 1;
-      err(semop(semid, &sb, 1), "[parent] had problem releasing semaphore");
+    else if (subserver == 0) {
+      char buf[4];
+      sprintf(buf, "%d", clients);
+      subserver_logic(client_socket, buf);
     }
   }
 
-  //once all players are ready parent closes + deletes shared memory and semaphore
-  shmdt(data);
-  shmctl(shmid, IPC_RMID, 0);
-  semctl(semid,IPC_RMID,0);
+  decsem(sema);
+
+  // remove later I think
+  shmctl(mem_id, IPC_RMID, 0); // remove the segment
+  semctl(sema, IPC_RMID, 0);
 }

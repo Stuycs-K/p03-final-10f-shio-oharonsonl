@@ -27,13 +27,15 @@ server-client messaging so that players can "ready up" (Jan 9th) - Louis
 
 Bracket logic & game assignments (Jan. 12th) - Owen
 
+Shared memory, semaphores, and communication between forked servers - Owen
+
 Player waiting screen (Jan 9th) - Louis
 
 Game functionality (Jan 12th) - Louis
 
 Merge game with tournament server (Jan 12th) - Louis
 
-Player resign, draw request through signals? (Jan 15th)  - Owen and Louis
+Player resign, draw request through signals? (Jan 15th) - Owen and Louis
 
 Bug fixes (Jan 15th) - Owen and Louis
 
