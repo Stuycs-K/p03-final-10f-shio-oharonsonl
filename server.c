@@ -14,7 +14,8 @@ void subserver_logic(int client_socket, char *id) {
   send(client_socket, id, sizeof(id), 0); // send the client's id
 
   int sema = semget(KEY, 1, 0);
-  while (semctl(sema, 0, GETVAL) == 1); // wait until 8 clients
+  while (semctl(sema, 0, GETVAL) == 1)
+    ; // wait until 8 clients
 
   send(client_socket, "1", sizeof(char), 0); // tell clients game has started
 

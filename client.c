@@ -19,5 +19,24 @@ int main(int argc, char *argv[]) {
   int server_socket = client_tcp_handshake(IP);
   printf("CONNECTED TO SERVER\n");
 
+  //  while(1){
+  //    printf("Ready to start playing? y/n/exit\n");
+  //    char * buffer = malloc(BUFFER_SIZE);
+  //    fgets(buffer, BUFFER_SIZE, stdin);
+  //    if(!strcmp(buffer, "y")){
+  //      err(send(server_socket,"1",strlen(to_server),0), "issue sending ready
+  //      message to server"); break;
+  //    }
+  //    if(!strcmp(buffer,"exit")){
+  //      exit(0);
+  //    }
+  //    sleep(1);
+  //  }
+  //
+  //  printf("You have readied!\n");
+  //  while(1){
+  //    //will fill in with code waiting to get the ready signal from the server
+  //  }
+
   client_logic(server_socket);
 }
