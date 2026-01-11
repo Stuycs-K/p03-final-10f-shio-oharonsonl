@@ -10,16 +10,59 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
+int PLAYER_NUM = 4;
+
 void subserver_logic(int client_socket, char *id) {
+  int mem_id = shmget(KEY, sizeof(char) * PLAYER_NUM, 0);
+  char *states = shmat(mem_id, NULL, 0);
+  if (states == (char *)-1) {
+    perror("shmat");
+    exit(1);
+  }
+
   send(client_socket, id, sizeof(char), 0); // send the client's id
 
   int sema = semget(KEY, 1, 0);
   while (semctl(sema, 0, GETVAL) == 1)
-    ; // wait until 8 clients
+    ; // wait until PLAYER_NUM clients
 
   send(client_socket, "1", sizeof(char), 0); // tell clients game has started
   // game logic
 
+  char move[3];
+  recv(client_socket, move, sizeof(move), 0);
+  printf("Client %s played move: %s\n", id, move);
+
+  if (strcmp(move, "ZZ") == 0) {
+    printf("Client %s has won the game!\n", id);
+    states[atoi(id) - 1] = 'W'; // mark winner in shared memory
+  } else if (strcmp(move, "XX") == 0) {
+    printf("Client %s has lost the game!\n", id);
+    states[atoi(id) - 1] = 'L'; // mark loser in shared memory
+  }
+
+  printf("Current game states:\n");
+  for (int i = 0; i < PLAYER_NUM; i++) {
+    printf("Player %d: %c\n", i + 1, states[i]);
+  }
+
+  // loop until all players have finished
+  int finished = 0;
+  while (!finished) {
+    finished = 1;
+    for (int i = 0; i < PLAYER_NUM; i++) {
+      if (states[i] != 'W' && states[i] != 'L') {
+        finished = 0;
+        break;
+      }
+    }
+    sleep(1);
+  }
+  printf("All players have finished the game.\n");
+
+  send(client_socket, "1", sizeof(char), 0); // notify client all done
+
+  shmdt(states);
   exit(0); // Must exit the fork
 }
 
@@ -39,7 +82,14 @@ int main() {
   signal(SIGINT, sighandler);
   int server_socket = server_setup();
 
-  int mem_id = shmget(KEY, sizeof(char), IPC_CREAT | 0664);
+  int mem_id = shmget(KEY, sizeof(char) * PLAYER_NUM, IPC_CREAT | 0664);
+  char *states = shmat(mem_id, NULL, 0);
+
+  // initialize game states to null
+  for (int i = 0; i < PLAYER_NUM; i++) {
+    states[i] = 0;
+  }
+
   int sema = semget(KEY, 1, IPC_CREAT | IPC_EXCL | 0664);
 
   union semun us;
@@ -47,7 +97,7 @@ int main() {
   semctl(sema, 0, SETVAL, us);
 
   int clients = 0;
-  while (clients < 8) {
+  while (clients < PLAYER_NUM) {
     int client_socket = server_tcp_handshake(server_socket);
     printf("A CLIENT HAS BEEN CONNECTED\n");
     clients++;
@@ -66,6 +116,9 @@ int main() {
   }
 
   decsem(sema);
+
+  for (int i = 0; i < PLAYER_NUM; i++)
+    wait(NULL); // wait for all child processes
 
   // remove later I think
   shmctl(mem_id, IPC_RMID, 0); // remove the segment

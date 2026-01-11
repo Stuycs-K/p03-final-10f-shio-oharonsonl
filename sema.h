@@ -1,7 +1,7 @@
 #ifndef SEMA_H
 #define SEMA_H
 
-#define KEY 234987269
+#define KEY 234987271
 
 // union semun {
 //   int val;
