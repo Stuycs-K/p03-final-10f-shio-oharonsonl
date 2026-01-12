@@ -3,6 +3,24 @@
 #include <stdlib.h>
 #include <sys/socket.h>
 
+void print_board(int* board[3]){
+  for(int i = 0; i < 3; i++){
+    printf("Row 1: ");
+    for(int j = 0; j < 3; j++){
+      if(board[i][j] == 0){//empty square
+        printf("  ");
+      }
+      if(board[i][j] == 1){//x
+        printf("X ");
+      }
+      else{//o or something's messed up
+        printf("O ")l
+      }
+    }
+    printf("\n");
+  }
+}
+
 void client_logic(int server_socket) {
   char id;
   recv(server_socket, &id, sizeof(char), 0); // this is blocking
@@ -13,7 +31,7 @@ void client_logic(int server_socket) {
 
   printf("GAME STARTS NOW! You are player %c\n", id);
 
-  printf("Move: \n");
+  printf("Move using coordinates (top left is 0,0): \n");
   char move[3];
   fgets(move, sizeof(move), stdin);
   send(server_socket, move, sizeof(move), 0);
