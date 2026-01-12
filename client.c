@@ -69,7 +69,13 @@ void client_logic(int server_socket) {
 
   while(1){
     recv(server_socket,opp_move,2,0);
+    int x_cor = opp_move[0];
+    int y_cor = opp_move[1];
 
+    if(GOING_FIRST)board[y_cor][x_cor] = 2;
+    else{
+      board[y_cor][x_cor] = 1;
+    }
   }
 
   print_board(board);

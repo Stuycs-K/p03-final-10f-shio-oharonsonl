@@ -14,5 +14,5 @@ Created an 8 integer array in shared memory so that the parent server knows when
 ### 2026-01-08 - Receiving ready signals on the server's end pt 2
 Created semaphore to make sure there isn't reading and writing happening at the same time between the different children and parents. I'll make child receiving of readiness and waiting screen tmrw
 
-### 2026-01-11 (and 01-12 before class) - Making the tic tac toe game
-Connect four was too hard, had to pivot. Will instead implement tic tac toe through the use of shared memory on the server side with a simple array of ints (0 for empty, 1 for x, 2 for o). If the game ends in a stalemate, it will be decided by a coin flip which the player who joined earlier will call. 
+### 2026-01-11 (and 01-12) - Making the tic tac toe game
+Connect four was too hard, had to pivot. Will instead implement tic tac toe through the use of shared memory on the server side with a simple array of ints (0 for empty, 1 for x, 2 for o). If the game ends in a stalemate, it will go to whoever didn't have first move.
