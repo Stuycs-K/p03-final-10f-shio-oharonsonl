@@ -1,14 +1,4 @@
 #include "networking.h"
-#include "sema.h"
-#include <signal.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/ipc.h>
-#include <sys/sem.h>
-#include <sys/shm.h>
-#include <sys/socket.h>
-#include <unistd.h>
 
 int PLAYER_NUM = 4;
 

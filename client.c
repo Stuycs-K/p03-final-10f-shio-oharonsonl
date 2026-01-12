@@ -40,7 +40,7 @@ void client_logic(int server_socket) {
     }
   }
 
-
+  
 
   printf("Move using coordinates (top left is 0,0): \n");
   char move[3];
