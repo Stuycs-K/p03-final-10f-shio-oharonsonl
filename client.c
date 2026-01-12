@@ -3,9 +3,10 @@
 #include <stdlib.h>
 #include <sys/socket.h>
 
-void print_board(int* board[3]){
+void print_board(int board[3][3]){
+  printf("Current game state: \n");
   for(int i = 0; i < 3; i++){
-    printf("Row 1: ");
+    printf("Row %d: ",i);
     for(int j = 0; j < 3; j++){
       if(board[i][j] == 0){//empty square
         printf("  ");
@@ -29,7 +30,17 @@ void client_logic(int server_socket) {
   char dummy;
   recv(server_socket, &dummy, sizeof(char), 0);
 
-  printf("GAME STARTS NOW! You are player %c\n", id);
+  printf("GAME 1 STARTS NOW! You are player %c\n", id);
+
+  //intialize game
+  int board[3][3];
+  for(int i = 0; i < 3; i++){
+    for(int j = 0; j < 3; j++){
+      board[i][j] = 0;
+    }
+  }
+
+
 
   printf("Move using coordinates (top left is 0,0): \n");
   char move[3];
