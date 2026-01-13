@@ -45,8 +45,7 @@ void client_logic(int server_socket) {
 
   //PLACEHOLDER FOR CHECKING IF THE CLIENT HAS THE FIRST MOVE OR NOT
   while(GOING_FIRST){
-    printf("Because you are going first, you are X's\n");
-    print_board(board);
+    printf("Because you are going first, you are X's (the board is currently empty)\n");
     printf("Move using coordinates (top left is 0,0): \n");
     fgets(my_move, sizeof(my_move), stdin);
 
@@ -76,13 +75,26 @@ void client_logic(int server_socket) {
     else{
       board[y_cor][x_cor] = 1;
     }
+
+    //loop until valid input
+    while(1){
+      print_board(board);
+      printf("Move using coordinates (top left is 0,0): \n");
+      fgets(my_move, sizeof(my_move), stdin);
+
+      int x_cor = atoi(my_move[0]);
+      int y_cor = atoi(my_move[2]);
+
+      if(x_cor > 2 || x_cor < 0 || y_cor > 2 || y_cor < 2){
+      printf("Invalid input! Try again\n");
+      }
+      else{
+        board[y_cor][x_cor] = 1;
+        send(server_socket,my_move,sizeof(my_move),0);
+        break;
+      }
+    }
   }
-
-  print_board(board);
-
-  printf("Move using coordinates (top left is 0,0): \n");
-  fgets(move, sizeof(move), stdin);
-  send(server_socket, move, sizeof(move), 0);
 
 }
 
