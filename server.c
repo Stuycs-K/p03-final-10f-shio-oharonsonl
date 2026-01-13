@@ -1,6 +1,10 @@
 #include "networking.h"
 #include "server.h"
 
+#define EMPTY 0
+#define X 1
+#define O 2
+
 void subserver_logic(int client_socket, char *id) {
   int states_id = shmget(STATES_KEY, sizeof(char) * PLAYER_NUM, 0);
   char *states = shmat(states_id, NULL, 0);
@@ -75,7 +79,51 @@ void subserver_logic(int client_socket, char *id) {
       decsem(board_sem);
     }
     while(1){
-      
+      incsem(board_sem);
+
+      //check for a winner
+      int lines[8][3] = {//all winning lines
+        {0, 1, 2}, {3, 4, 5}, {6, 7, 8}, // rows
+        {0, 3, 6}, {1, 4, 7}, {2, 5, 8}, // cols
+        {0, 4, 8}, {2, 4, 6}             // diags
+      };
+
+      for (int i = 0; i < 8; i++) {
+        int a = lines[i][0], b = lines[i][1], c = lines[i][2];
+
+        int ar = a / 3, ac = a % 3;
+        int br = b / 3, bc = b % 3;
+        int cr = c / 3, cc = c % 3;
+
+        int v1 = board[ar][ac];
+        if (v1 == EMPTY) continue; // can't win with empties
+
+        int v2 = board[br][bc];
+        int v3 = board[cr][cc];
+
+        if (v1 == v2 && v2 == v3){
+          if(v1 == 1){
+            if(atoi(id) % 2 ==0){
+              opp_move[0] = 4;
+              opp_move[1] = 4;
+            }
+            else{
+              opp_move[0] = 3;
+              opp_move[1] = 3;
+            }
+          }
+          else{
+            if(atoi(id) % 2 ==0){
+              opp_move[0] = 3;
+              opp_move[1] = 3;
+            }
+            else{
+              opp_move[0] = 4;
+              opp_move[1] = 4;
+            }
+          }
+        }; // winner: X or O
+      }
     }
   }
   // game logic
