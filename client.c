@@ -29,7 +29,9 @@ void client_logic(int server_socket) {
   recv(server_socket, &dummy, sizeof(char), 0);
 
   printf("GAME 1 STARTS NOW! You are player %c\n", my_id);
+  printf("%d\n",atoi(&my_id));
   if(atoi(&my_id) % 2 == 0){
+    printf("dookie dum dum %d\n", atoi(&my_id));
     printf("I am a babbling buffoon %c\n",my_id);
     game(0,server_socket);
   }

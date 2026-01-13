@@ -23,7 +23,8 @@ void subserver_logic(int client_socket, char *id) {
     perror("shmat");
     exit(1);
   }
-
+  printf("Sending %c\n",*id);
+  printf("Sending %d\n",atoi(id));
   send(client_socket, id, sizeof(char), 0); // send the client's id
 
   int sema = semget(STATES_KEY, 1, 0);
