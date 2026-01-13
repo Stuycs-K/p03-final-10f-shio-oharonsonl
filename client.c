@@ -92,8 +92,8 @@ void game(int GOING_FIRST){
 
   while(1){
     recv(server_socket,opp_move,2,0);
-    int x_cor = opp_move[0];
-    int y_cor = opp_move[1];
+    int x_cor = atoi(opp_move[0]);
+    int y_cor = atoi(opp_move[1]);
 
     if(y_cor == 3 && x_cor == 3){//server sent loss code
       printf("It appears you have lost. Adios!\n");

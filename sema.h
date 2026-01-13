@@ -12,6 +12,11 @@
 #define BOARD_THREE_SEM 67694202
 #define BOARD_FOUR_SEM 67694203
 
+#define MOVE_ONE 67694204
+#define MOVE_TWO 67694205
+#define MOVE_THREE 67694206
+#define MOVE_FOUR 67694207
+
 union semun {
   int val;
   struct semid_ds *buf;

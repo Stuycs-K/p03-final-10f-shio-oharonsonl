@@ -14,6 +14,11 @@ void subserver_logic(int client_socket, char *id) {
   int board_three = shmget(BOARD_THREE, sizeof(int) * 9, IPC_CREAT | 0664);
   int board_four = shmget(BOARD_FOUR, sizeof(int) * 9, IPC_CREAT | 0664);
 
+  int move_one = shmget(MOVE_ONE, sizeof(char) * 2, IPC_CREAT | 0664);
+  int move_two = shmget(MOVE_TWO, sizeof(char) * 2, IPC_CREAT | 0664);
+  int move_three = shmget(MOVE_THREE, sizeof(char) * 2, IPC_CREAT | 0664);
+  int move_four = shmget(MOVE_FOUR, sizeof(char) * 2, IPC_CREAT | 0664);
+
   if (states == (char *)-1) {
     perror("shmat");
     exit(1);
@@ -28,8 +33,9 @@ void subserver_logic(int client_socket, char *id) {
   send(client_socket, "1", sizeof(char), 0); // tell clients game has started
 
   //three games
+  char * opp_move;
   for(int i = 0; i < 3; i++){
-    if(i != 0){//update later, for now only one game
+    if(i != 0){//update later, for now only one game works
       break;
       char opp_id = determine_opps(states, id);
     }
@@ -40,18 +46,22 @@ void subserver_logic(int client_socket, char *id) {
       if(id == '1'||id=='2'){
         board = shmat(board_one,0,0);
         board_sem = semget(BOARD_ONE_SEM, 1, 0);
+        opp_move = shmat(move_one,0,0);
       }
       if(id == '3'||id=='4'){
         board = shmat(board_two,0,0);
         board_sem = semget(BOARD_TWO_SEM, 1, 0);
+        opp_move = shmat(move_two,0,0);
       }
       if(id == '5'||id=='6'){
         board = shmat(board_three,0,0);
         board_sem = semget(BOARD_THREE_SEM, 1, 0);
+        opp_move = shmat(move_three,0,0);
       }
       if(id == '7'||id=='8'){
         board = shmat(board_four,0,0);
         board_sem = semget(BOARD_FOUR_SEM, 1, 0);
+        opp_move = shmat(move_four,0,0);
       }
 
       if(atoi(id) % 2 == 0){//first move
@@ -66,15 +76,17 @@ void subserver_logic(int client_socket, char *id) {
     //game
 
     int my_move[3];
-    int opp_move[2];
 
     //first move
     if(atoi(id) % 2 == 0){
-      recv(client_socket, my_move, sizeof(my_move),0);
-      int x_cor = my_move[0];
-      int y_cor = my_move[2];
+      recv(client_socket, my_move, 3,0);
+      int x_cor = atoi(my_move[0]);
+      int y_cor = atoi(my_move[2]);
 
       board[y_cor][x_cor] = 1;
+
+      opp_move[0] = my_move[0];
+      opp_move[1] = my_move[2];
 
       decsem(board_sem);
     }
@@ -106,39 +118,53 @@ void subserver_logic(int client_socket, char *id) {
             if(atoi(id) % 2 ==0){
               opp_move[0] = 4;
               opp_move[1] = 4;
+              states[atoi(id)-1]='W';
             }
             else{
               opp_move[0] = 3;
               opp_move[1] = 3;
+              states[atoi(id)-1] = 'L';
+              printf("Client lost, exiting\n");
+              exit(0);
             }
           }
           else{
             if(atoi(id) % 2 ==0){
               opp_move[0] = 3;
               opp_move[1] = 3;
+              states[atoi(id)-1] = 'L';
+              printf("Client lost, exiting\n");
+              exit(0);
             }
             else{
               opp_move[0] = 4;
               opp_move[1] = 4;
+              states[atoi(id)-1] = 'W';
             }
           }
-        }; // winner: X or O
+        }
       }
+
+      send(client_socket, opp_move, 2, 0);
+      recv(client_socket, my_move, 3, 0);
+
+      int x_cor = atoi(my_move[0]);
+      int y_cor = atoi(my_move[2]);
+
+      if(atoi(id)%2==0)board[y_cor][x_cor] = 2;
+      else{
+        board[y_cor][x_cor] = 1;
+      }
+
+      opp_move[0] = my_move[0];
+      opp_move[1] = my_move[2];
+
+      decsem(board_sem);
     }
+    shmdt(board);
+    shmdt(opp_move);
   }
   // game logic
-
-  char move[3];
-  recv(client_socket, move, sizeof(move), 0);
-  printf("Client %s played move: %s\n", id, move);
-
-  if (strcmp(move, "ZZ") == 0) {
-    printf("Client %s has won the game!\n", id);
-    states[atoi(id) - 1] = 'W'; // mark winner in shared memory
-  } else if (strcmp(move, "XX") == 0) {
-    printf("Client %s has lost the game!\n", id);
-    states[atoi(id) - 1] = 'L'; // mark loser in shared memory
-  }
 
   printf("Current game states:\n");
   for (int i = 0; i < PLAYER_NUM; i++) {
@@ -199,6 +225,11 @@ int main() {
   int board_two = shmget(BOARD_TWO, sizeof(int) * 9, IPC_CREAT | 0664);
   int board_three = shmget(BOARD_THREE, sizeof(int) * 9, IPC_CREAT | 0664);
   int board_four = shmget(BOARD_FOUR, sizeof(int) * 9, IPC_CREAT | 0664);
+
+  int move_one = shmget(MOVE_ONE, sizeof(char) * 2, IPC_CREAT | 0664);
+  int move_two = shmget(MOVE_TWO, sizeof(char) * 2, IPC_CREAT | 0664);
+  int move_three = shmget(MOVE_THREE, sizeof(char) * 2, IPC_CREAT | 0664);
+  int move_four = shmget(MOVE_FOUR, sizeof(char) * 2, IPC_CREAT | 0664);
 
   int sema = semget(STATES_KEY, 1, IPC_CREAT | IPC_EXCL | 0664);
   union semun us;
