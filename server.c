@@ -5,6 +5,11 @@ void subserver_logic(int client_socket, char *id) {
   int states_id = shmget(STATES_KEY, sizeof(char) * PLAYER_NUM, 0);
   char *states = shmat(states_id, NULL, 0);
 
+  int board_one = shmget(BOARD_ONE, sizeof(int) * 9, IPC_CREAT | 0664);
+  int board_two = shmget(BOARD_TWO, sizeof(int) * 9, IPC_CREAT | 0664);
+  int board_three = shmget(BOARD_THREE, sizeof(int) * 9, IPC_CREAT | 0664);
+  int board_four = shmget(BOARD_FOUR, sizeof(int) * 9, IPC_CREAT | 0664);
+
   if (states == (char *)-1) {
     perror("shmat");
     exit(1);
@@ -20,8 +25,44 @@ void subserver_logic(int client_socket, char *id) {
 
   //three games
   for(int i = 0; i < 3; i++){
-    if(i != 0){
-      char opp_id = determine_opps(states);
+    if(i != 0){//update later, for now only one game
+      break;
+      char opp_id = determine_opps(states, id);
+    }
+    else{
+      int** board;
+      int board_sem;
+
+      if(id == '1'||id=='2'){
+        board = shmat(board_one,0,0);
+        board_sem = semget(BOARD_ONE_SEM, 1, 0);
+      }
+      if(id == '3'||id=='4'){
+        board = shmat(board_two,0,0);
+        board_sem = semget(BOARD_TWO_SEM, 1, 0);
+      }
+      if(id == '5'||id=='6'){
+        board = shmat(board_three,0,0);
+        board_sem = semget(BOARD_THREE_SEM, 1, 0);
+      }
+      if(id == '7'||id=='8'){
+        board = shmat(board_four,0,0);
+        board_sem = semget(BOARD_FOUR_SEM, 1, 0);
+      }
+
+
+      if(atoi(id) % 2 == 0){//first move
+        for(int i = 0; i < 3; i++){
+          for(int j = 0; j < 3; j++){
+            board[i][j] = 0;
+          }
+        }
+      }
+    }
+    while(1){
+      if(atoi(id) % 2 == 0){
+        recv()
+      }
     }
   }
   // game logic
@@ -83,20 +124,37 @@ static void sighandler(int signo) {
   }
 }
 
+//will figure this out
+char determine_opps(char * states, char * id){
+
+}
+
 int main() {
   signal(SIGINT, sighandler);
   int server_socket = server_setup();
 
   int states = shmget(STATES_KEY, sizeof(char) * PLAYER_NUM, IPC_CREAT | 0664);
-  int board_one = shmget(BOARD_ONE, sizeof(char) * PLAYER_NUM, IPC_CREAT | 0664);
-  int board_two = shmget(BOARD_TWO, sizeof(char) * PLAYER_NUM, IPC_CREAT | 0664);
-  int board_three = shmget(BOARD_THREE, sizeof(char) * PLAYER_NUM, IPC_CREAT | 0664);
-  int board_four = shmget(BOARD_FOUR, sizeof(char) * PLAYER_NUM, IPC_CREAT | 0664);
+  int board_one = shmget(BOARD_ONE, sizeof(int) * 9, IPC_CREAT | 0664);
+  int board_two = shmget(BOARD_TWO, sizeof(int) * 9, IPC_CREAT | 0664);
+  int board_three = shmget(BOARD_THREE, sizeof(int) * 9, IPC_CREAT | 0664);
+  int board_four = shmget(BOARD_FOUR, sizeof(int) * 9, IPC_CREAT | 0664);
 
   int sema = semget(STATES_KEY, 1, IPC_CREAT | IPC_EXCL | 0664);
   union semun us;
   us.val = 1;
   semctl(sema, 0, SETVAL, us);
+
+  int board_sem[4];
+  board_sem[0] = semget(BOARD_ONE_SEM, 1, 0);
+  board_sem[1] = semget(BOARD_ONE_SEM, 1, 0);
+  board_sem[2] = semget(BOARD_ONE_SEM, 1, 0);
+  board_sem[3] = semget(BOARD_ONE_SEM, 1, 0);
+  if(int i = 0; i < 4; i++){
+    union semun us;
+    us.val = 1;
+    semctl(board_sem[i], 0, SETVAL, us);
+  }
+
 
   int clients = 0;
   while (clients < PLAYER_NUM) {
