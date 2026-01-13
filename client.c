@@ -1,7 +1,5 @@
 #include "networking.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/socket.h>
+#include "client.h"
 
 void print_board(int board[3][3]){
   printf("Current game state: \n");
@@ -46,7 +44,7 @@ void client_logic(int server_socket) {
   }
 
   recv(server_socket,&opp_id,sizeof(char), 0);
-  printf("Playing for the chip against player %c!\n",opp_id);
+  printf("Playing for the championship against player %c!\n",opp_id);
   //player with lower id number goes first
   if(my_id < opp_id)game(1);
   else{

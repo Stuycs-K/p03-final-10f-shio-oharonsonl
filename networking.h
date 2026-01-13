@@ -9,6 +9,8 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
+#define PLAYER_NUM 8
+
 #ifndef NETWORKING_H
 #define NETWORKING_H
 

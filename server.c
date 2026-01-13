@@ -1,6 +1,5 @@
 #include "networking.h"
-
-int PLAYER_NUM = 8;
+#include "server.h"
 
 void subserver_logic(int client_socket, char *id) {
   int states_id = shmget(STATES_KEY, sizeof(char) * PLAYER_NUM, 0);
@@ -18,6 +17,13 @@ void subserver_logic(int client_socket, char *id) {
     ; // wait until PLAYER_NUM clients
 
   send(client_socket, "1", sizeof(char), 0); // tell clients game has started
+
+  //three games
+  for(int i = 0; i < 3; i++){
+    if(i != 0){
+      char opp_id = determine_opps(states);
+    }
+  }
   // game logic
 
   char move[3];
@@ -51,7 +57,7 @@ void subserver_logic(int client_socket, char *id) {
   }
   printf("All players have finished the game.\n");
 
-  send(client_socket, "1", sizeof(char), 0); // notify client all done
+
 
   shmdt(states);
   exit(0); // Must exit the fork
