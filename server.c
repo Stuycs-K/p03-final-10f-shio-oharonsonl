@@ -35,30 +35,30 @@ void subserver_logic(int client_socket, char *id) {
   //three games
   char * opp_move;
   for(int i = 0; i < 3; i++){
+    int** board;
+    int board_sem;
     if(i != 0){//update later, for now only one game works
       break;
       char opp_id = determine_opps(states, id);
     }
     else{
-      int** board;
-      int board_sem;
 
-      if(id == '1'||id=='2'){
+      if(*id == '1'||*id=='2'){
         board = shmat(board_one,0,0);
         board_sem = semget(BOARD_ONE_SEM, 1, 0);
         opp_move = shmat(move_one,0,0);
       }
-      if(id == '3'||id=='4'){
+      if(*id == '3'||*id=='4'){
         board = shmat(board_two,0,0);
         board_sem = semget(BOARD_TWO_SEM, 1, 0);
         opp_move = shmat(move_two,0,0);
       }
-      if(id == '5'||id=='6'){
+      if(*id == '5'||*id=='6'){
         board = shmat(board_three,0,0);
         board_sem = semget(BOARD_THREE_SEM, 1, 0);
         opp_move = shmat(move_three,0,0);
       }
-      if(id == '7'||id=='8'){
+      if(*id == '7'||*id=='8'){
         board = shmat(board_four,0,0);
         board_sem = semget(BOARD_FOUR_SEM, 1, 0);
         opp_move = shmat(move_four,0,0);
@@ -75,13 +75,13 @@ void subserver_logic(int client_socket, char *id) {
     }
     //game
 
-    int my_move[3];
+    char my_move[3];
 
     //first move
     if(atoi(id) % 2 == 0){
       recv(client_socket, my_move, 3,0);
-      int x_cor = atoi(my_move[0]);
-      int y_cor = atoi(my_move[2]);
+      int x_cor = atoi(&my_move[0]);
+      int y_cor = atoi(&my_move[2]);
 
       board[y_cor][x_cor] = 1;
 
@@ -148,8 +148,8 @@ void subserver_logic(int client_socket, char *id) {
       send(client_socket, opp_move, 2, 0);
       recv(client_socket, my_move, 3, 0);
 
-      int x_cor = atoi(my_move[0]);
-      int y_cor = atoi(my_move[2]);
+      int x_cor = atoi(&my_move[0]);
+      int y_cor = atoi(&my_move[2]);
 
       if(atoi(id)%2==0)board[y_cor][x_cor] = 2;
       else{
