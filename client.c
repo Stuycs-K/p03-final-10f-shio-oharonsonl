@@ -7,13 +7,13 @@ void print_board(int board[3][3]){
     printf("Row %d: ",i);
     for(int j = 0; j < 3; j++){
       if(board[i][j] == 0){//empty square
-        printf("  ");
+        printf(" - ");
       }
       else if(board[i][j] == 1){//x
-        printf("X ");
+        printf(" X ");
       }
-      else{//o or something's messed up
-        printf("O ");
+      else if(board[i][j] == 2){//o or something's messed up
+        printf(" O ");
       }
     }
     printf("\n");
@@ -29,7 +29,10 @@ void client_logic(int server_socket) {
   recv(server_socket, &dummy, sizeof(char), 0);
 
   printf("GAME 1 STARTS NOW! You are player %c\n", my_id);
-  if(atoi(&my_id) % 2 == 0)game(0,server_socket);
+  if(atoi(&my_id) % 2 == 0){
+    printf("I am a babbling buffoon %c\n",my_id);
+    game(0,server_socket);
+  }
   else{
     game(1,server_socket);
   }
@@ -68,8 +71,10 @@ void game(int GOING_FIRST, int server_socket){
   char opp_move[2];
   char my_move[3];
 
-  while(GOING_FIRST==1){
+  while(GOING_FIRST==0){
     printf("Because you are going first, you are X's (the board is currently empty)\n");
+    printf("snickle my pickle %d\n\n\n\n\n",GOING_FIRST);
+    printf("%d BLAHJ\n",GOING_FIRST);
     printf("Move using coordinates (top left is 0,0): \n");
     fgets(my_move, sizeof(my_move), stdin);
 
@@ -85,12 +90,17 @@ void game(int GOING_FIRST, int server_socket){
       break;
     }
   }
-  if(!GOING_FIRST){
+  if(GOING_FIRST==1){
     printf("Because you are not going first, you have O's (but get the auto-win in a stalemate!)\n");
   }
 
-
   while(1){
+    //use listen to block until there's actually a move from the server
+    fd_set descriptors;
+    FD_ZERO(&descriptors);
+    FD_SET(server_socket, &descriptors);
+    select(server_socket+1, &descriptors, NULL,NULL,NULL);
+
     recv(server_socket,opp_move,2,0);
     int x_cor = atoi(&opp_move[0]);
     int y_cor = atoi(&opp_move[1]);
@@ -105,7 +115,7 @@ void game(int GOING_FIRST, int server_socket){
       printf("You win! Yay!\n");
     }
 
-    if(GOING_FIRST)board[y_cor][x_cor] = 2;
+    if(GOING_FIRST==1)board[y_cor][x_cor] = 2;
     else{
       board[y_cor][x_cor] = 1;
     }
@@ -119,7 +129,7 @@ void game(int GOING_FIRST, int server_socket){
       int x_cor = atoi(&my_move[0]);
       int y_cor = atoi(&my_move[2]);
 
-      if(x_cor > 2 || x_cor < 0 || y_cor > 2 || y_cor < 2){
+      if(x_cor > 2 || x_cor < 0 || y_cor > 2 || y_cor < 0){
       printf("Invalid input! Try again\n");
       }
       else{
