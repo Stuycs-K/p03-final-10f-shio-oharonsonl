@@ -1,10 +1,11 @@
 #include "networking.h"
 
-int PLAYER_NUM = 4;
+int PLAYER_NUM = 8;
 
 void subserver_logic(int client_socket, char *id) {
-  int mem_id = shmget(KEY, sizeof(char) * PLAYER_NUM, 0);
-  char *states = shmat(mem_id, NULL, 0);
+  int states_id = shmget(STATES_KEY, sizeof(char) * PLAYER_NUM, 0);
+  char *states = shmat(states_id, NULL, 0);
+
   if (states == (char *)-1) {
     perror("shmat");
     exit(1);
@@ -12,7 +13,7 @@ void subserver_logic(int client_socket, char *id) {
 
   send(client_socket, id, sizeof(char), 0); // send the client's id
 
-  int sema = semget(KEY, 1, 0);
+  int sema = semget(STATES_KEY, 1, 0);
   while (semctl(sema, 0, GETVAL) == 1)
     ; // wait until PLAYER_NUM clients
 
@@ -59,10 +60,18 @@ void subserver_logic(int client_socket, char *id) {
 // remove shared memory on quit
 static void sighandler(int signo) {
   if (signo == SIGINT) {
-    int shmid = shmget(KEY, sizeof(int), 0);
-    int sema = semget(KEY, 1, 0);
+    int states = shmget(STATES_KEY, sizeof(int), 0);
+    int board_one = shmget(STATES_KEY, sizeof(int), 0);
+    int board_two = shmget(STATES_KEY, sizeof(int), 0);
+    int board_three= shmget(STATES_KEY, sizeof(int), 0);
+    int board_four= shmget(STATES_KEY, sizeof(int), 0);
+    int sema = semget(STATES_KEY, 1, 0);
 
-    shmctl(shmid, IPC_RMID, 0);
+    shmctl(states, IPC_RMID, 0);
+    shmctl(board_one, IPC_RMID, 0);
+    shmctl(board_two, IPC_RMID, 0);
+    shmctl(board_three, IPC_RMID, 0);
+    shmctl(board_four, IPC_RMID, 0);
     semctl(sema, IPC_RMID, 0);
     exit(1);
   }
@@ -72,16 +81,13 @@ int main() {
   signal(SIGINT, sighandler);
   int server_socket = server_setup();
 
-  int mem_id = shmget(KEY, sizeof(char) * PLAYER_NUM, IPC_CREAT | 0664);
-  char *states = shmat(mem_id, NULL, 0);
+  int states = shmget(STATES_KEY, sizeof(char) * PLAYER_NUM, IPC_CREAT | 0664);
+  int board_one = shmget(BOARD_ONE, sizeof(char) * PLAYER_NUM, IPC_CREAT | 0664);
+  int board_two = shmget(BOARD_TWO, sizeof(char) * PLAYER_NUM, IPC_CREAT | 0664);
+  int board_three = shmget(BOARD_THREE, sizeof(char) * PLAYER_NUM, IPC_CREAT | 0664);
+  int board_four = shmget(BOARD_FOUR, sizeof(char) * PLAYER_NUM, IPC_CREAT | 0664);
 
-  // initialize game states to null
-  for (int i = 0; i < PLAYER_NUM; i++) {
-    states[i] = 0;
-  }
-
-  int sema = semget(KEY, 1, IPC_CREAT | IPC_EXCL | 0664);
-
+  int sema = semget(STATES_KEY, 1, IPC_CREAT | IPC_EXCL | 0664);
   union semun us;
   us.val = 1;
   semctl(sema, 0, SETVAL, us);
@@ -111,6 +117,6 @@ int main() {
     wait(NULL); // wait for all child processes
 
   // remove later I think
-  shmctl(mem_id, IPC_RMID, 0); // remove the segment
+  shmctl(states, IPC_RMID, 0); // remove the segment
   semctl(sema, IPC_RMID, 0);
 }
