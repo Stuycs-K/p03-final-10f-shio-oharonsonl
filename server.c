@@ -50,8 +50,8 @@ void subserver_logic(int client_socket, char *id) {
         board_sem = semget(BOARD_FOUR_SEM, 1, 0);
       }
 
-
       if(atoi(id) % 2 == 0){//first move
+        incsem(board_sem);
         for(int i = 0; i < 3; i++){
           for(int j = 0; j < 3; j++){
             board[i][j] = 0;
@@ -59,10 +59,23 @@ void subserver_logic(int client_socket, char *id) {
         }
       }
     }
+    //game
+
+    int my_move[3];
+    int opp_move[2];
+
+    //first move
+    if(atoi(id) % 2 == 0){
+      recv(client_socket, my_move, sizeof(my_move),0);
+      int x_cor = my_move[0];
+      int y_cor = my_move[2];
+
+      board[y_cor][x_cor] = 1;
+
+      decsem(board_sem);
+    }
     while(1){
-      if(atoi(id) % 2 == 0){
-        recv()
-      }
+      
     }
   }
   // game logic
@@ -149,7 +162,7 @@ int main() {
   board_sem[1] = semget(BOARD_ONE_SEM, 1, 0);
   board_sem[2] = semget(BOARD_ONE_SEM, 1, 0);
   board_sem[3] = semget(BOARD_ONE_SEM, 1, 0);
-  if(int i = 0; i < 4; i++){
+  for(int i = 0; i < 4; i++){
     union semun us;
     us.val = 1;
     semctl(board_sem[i], 0, SETVAL, us);
