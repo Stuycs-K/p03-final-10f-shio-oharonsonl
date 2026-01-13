@@ -23,29 +23,42 @@ void print_board(int board[3][3]){
 }
 
 void client_logic(int server_socket) {
-  char id;
-  recv(server_socket, &id, sizeof(char), 0); // this is blocking
+  char my_id;
+  recv(server_socket, &my_id, sizeof(char), 0); // this is blocking
 
-  printf("Recieved: %c\n", id);
+  printf("Recieved: %c\n", my_id);
   char dummy;
   recv(server_socket, &dummy, sizeof(char), 0);
 
   printf("GAME 1 STARTS NOW! You are player %c\n", id);
-  game();
+  if(atoi(id) % 2 == 0)game(0);
+  else{
+    game(1);
+  }
 
-  recv(server_socket, &id, sizeof(char), 0);
-  printf("Congratulations, you are in the semifinals! You are playing player %c\n", id);
-  game();
+  char opp_id;
+  recv(server_socket, &opp_id, sizeof(char), 0);
+  printf("Congratulations, you are in the semifinals! You are playing player %c\n", opp_id);
+  //player with lower id number goes first
+  if(my_id < opp_id)game(1);
+  else{
+    game(0);
+  }
 
-  recv(server_socket,&id,sizeof(char), 0);
-  printf("Playing for the chip against player %c!\n",id);
-  game();
+  recv(server_socket,&opp_id,sizeof(char), 0);
+  printf("Playing for the chip against player %c!\n",opp_id);
+  //player with lower id number goes first
+  if(my_id < opp_id)game(1);
+  else{
+    game(0);
+  }
+
 
   printf("WE DID IT!!!!! YOU WIN!!!!!!\n");
   exit(0);
 }
 
-void game(){
+void game(int GOING_FIRST){
   //intialize board
   int board[3][3];
   for(int i = 0; i < 3; i++){
@@ -57,7 +70,6 @@ void game(){
   char opp_move[2];
   char my_move[3];
 
-  //PLACEHOLDER FOR CHECKING IF THE CLIENT HAS THE FIRST MOVE OR NOT
   while(GOING_FIRST){
     printf("Because you are going first, you are X's (the board is currently empty)\n");
     printf("Move using coordinates (top left is 0,0): \n");
