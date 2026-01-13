@@ -31,8 +31,22 @@ void client_logic(int server_socket) {
   recv(server_socket, &dummy, sizeof(char), 0);
 
   printf("GAME 1 STARTS NOW! You are player %c\n", id);
+  game();
 
-  //intialize game
+  recv(server_socket, &id, sizeof(char), 0);
+  printf("Congratulations, you are in the semifinals! You are playing player %c\n", id);
+  game();
+
+  recv(server_socket,&id,sizeof(char), 0);
+  printf("Playing for the chip against player %c!\n",id);
+  game();
+
+  printf("WE DID IT!!!!! YOU WIN!!!!!!\n");
+  exit(0);
+}
+
+void game(){
+  //intialize board
   int board[3][3];
   for(int i = 0; i < 3; i++){
     for(int j = 0; j < 3; j++){
@@ -71,6 +85,16 @@ void client_logic(int server_socket) {
     int x_cor = opp_move[0];
     int y_cor = opp_move[1];
 
+    if(y_cor == 3 && x_cor == 3){//server sent loss code
+      printf("It appears you have lost. Adios!\n");
+      exit(0);
+      //can later give the opportunity to stay and wait to hear winner, maybe even a third place game
+    }
+
+    else if(y_cor == 4 && x_cor == 4){//server sent win message
+      printf("You win! Yay!\n");
+    }
+
     if(GOING_FIRST)board[y_cor][x_cor] = 2;
     else{
       board[y_cor][x_cor] = 1;
@@ -95,7 +119,6 @@ void client_logic(int server_socket) {
       }
     }
   }
-
 }
 
 int main(int argc, char *argv[]) {
