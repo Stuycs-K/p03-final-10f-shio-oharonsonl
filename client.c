@@ -9,7 +9,7 @@ void print_board(int board[3][3]){
       if(board[i][j] == 0){//empty square
         printf("  ");
       }
-      if(board[i][j] == 1){//x
+      else if(board[i][j] == 1){//x
         printf("X ");
       }
       else{//o or something's messed up
@@ -68,7 +68,7 @@ void game(int GOING_FIRST, int server_socket){
   char opp_move[2];
   char my_move[3];
 
-  while(GOING_FIRST){
+  while(GOING_FIRST==1){
     printf("Because you are going first, you are X's (the board is currently empty)\n");
     printf("Move using coordinates (top left is 0,0): \n");
     fgets(my_move, sizeof(my_move), stdin);
@@ -76,7 +76,7 @@ void game(int GOING_FIRST, int server_socket){
     int x_cor = atoi(&my_move[0]);
     int y_cor = atoi(&my_move[2]);
 
-    if(x_cor > 2 || x_cor < 0 || y_cor > 2 || y_cor < 2){
+    if(x_cor > 2 || x_cor < 0 || y_cor > 2 || y_cor < 0){
       printf("Invalid input! Try again\n");
     }
     else{

@@ -1,3 +1,6 @@
+#include <sys/types.h>
+#include <sys/wait.h>
+
 #ifndef server_h
 #define server_h
 void subserver_logic(int client_socket, char *id);
