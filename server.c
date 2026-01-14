@@ -11,16 +11,16 @@
 #include <unistd.h>
 
 void subserver_logic(int client_socket, char *id) {
-  send(client_socket, id, sizeof(char), 0); // send the client's id
+  send(client_socket, id, sizeof(char), 0);
 
   int sema = semget(KEY, 1, 0);
-  while (semctl(sema, 0, GETVAL) == 1)
-    ; // wait until 8 clients
+  while (semctl(sema, 0, GETVAL) == 1) {
+    sleep(1);
+  };
 
-  send(client_socket, "1", sizeof(char), 0); // tell clients game has started
-  // game logic
+  send(client_socket, "1", sizeof(char), 0);
 
-  exit(0); // Must exit the fork
+  exit(0);
 }
 
 // remove shared memory on quit
@@ -39,9 +39,7 @@ int main() {
   signal(SIGINT, sighandler);
   int server_socket = server_setup();
 
-  int mem_id = shmget(KEY, sizeof(char), IPC_CREAT | 0664);
   int sema = semget(KEY, 1, IPC_CREAT | IPC_EXCL | 0664);
-
   union semun us;
   us.val = 1;
   semctl(sema, 0, SETVAL, us);
@@ -64,10 +62,7 @@ int main() {
       subserver_logic(client_socket, buf);
     }
   }
-
   decsem(sema);
 
-  // remove later I think
-  shmctl(mem_id, IPC_RMID, 0); // remove the segment
   semctl(sema, IPC_RMID, 0);
 }
