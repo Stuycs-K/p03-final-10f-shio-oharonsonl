@@ -23,7 +23,6 @@ void subserver_logic(int client_socket, char *id) {
     perror("shmat");
     exit(1);
   }
-  printf("Sending %c\n",*id);
   send(client_socket, id, sizeof(char), 0); // send the client's id
 
   int id_int = *id - '0';
@@ -31,8 +30,6 @@ void subserver_logic(int client_socket, char *id) {
   int sema = semget(STATES_KEY, 1, 0);
   while (semctl(sema, 0, GETVAL) == 1)
     ; // wait until PLAYER_NUM clients
-
-  send(client_socket, "1", sizeof(char), 0); // tell clients game has started
 
   //three games
   char * opp_move;
@@ -67,7 +64,7 @@ void subserver_logic(int client_socket, char *id) {
       }
 
       if(id_int % 2 == 0){//first move
-        incsem(board_sem);
+        decsem(board_sem);
         for(int i = 0; i < 3; i++){
           for(int j = 0; j < 3; j++){
             board[i][j] = 0;
@@ -81,10 +78,6 @@ void subserver_logic(int client_socket, char *id) {
 
     //first move
     if(id_int % 2 == 0){
-      fd_set descriptors;
-      FD_ZERO(&descriptors);
-      FD_SET(client_socket, &descriptors);
-      select(client_socket+1, &descriptors, NULL,NULL,NULL);
       recv(client_socket, my_move, 3,0);
       int x_cor = my_move[0]-'0';
       int y_cor = my_move[2]-'0';
@@ -94,14 +87,10 @@ void subserver_logic(int client_socket, char *id) {
       opp_move[0] = my_move[0];
       opp_move[1] = my_move[2];
 
-      decsem(board_sem);
+      incsem(board_sem);
     }
     while(1){
-      fd_set descriptors;
-      FD_ZERO(&descriptors);
-      FD_SET(client_socket, &descriptors);
-      select(client_socket+1, &descriptors, NULL,NULL,NULL);
-      incsem(board_sem);
+      decsem(board_sem);
 
       //check for a winner
       int lines[8][3] = {//all winning lines
@@ -169,7 +158,7 @@ void subserver_logic(int client_socket, char *id) {
       opp_move[0] = my_move[0];
       opp_move[1] = my_move[2];
 
-      decsem(board_sem);
+      incsem(board_sem);
     }
     shmdt(board);
     shmdt(opp_move);
@@ -198,6 +187,7 @@ void subserver_logic(int client_socket, char *id) {
 
 
   shmdt(states);
+  printf("I am dumb dumb stinky fart\n");
   exit(0); // Must exit the fork
 }
 

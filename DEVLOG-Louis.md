@@ -21,3 +21,6 @@ Started by creating the move logic and win/loss handling for the client, then mo
 
 ### 2026-01-13 (in class and at home) - debugging and head scratching
 Worked on fixing char to int conversions, there is more to be done on the server side as well to make sure everything works.
+
+### 2026-01-14 (in class) - still debugging blocking issues
+Worked on 
