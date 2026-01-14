@@ -24,8 +24,9 @@ void subserver_logic(int client_socket, char *id) {
     exit(1);
   }
   printf("Sending %c\n",*id);
-  printf("Sending %d\n",atoi(id));
   send(client_socket, id, sizeof(char), 0); // send the client's id
+
+  int id_int = *id - '0';
 
   int sema = semget(STATES_KEY, 1, 0);
   while (semctl(sema, 0, GETVAL) == 1)
@@ -65,7 +66,7 @@ void subserver_logic(int client_socket, char *id) {
         opp_move = shmat(move_four,0,0);
       }
 
-      if(atoi(id) % 2 == 0){//first move
+      if(id_int % 2 == 0){//first move
         incsem(board_sem);
         for(int i = 0; i < 3; i++){
           for(int j = 0; j < 3; j++){
@@ -79,10 +80,14 @@ void subserver_logic(int client_socket, char *id) {
     char my_move[3];
 
     //first move
-    if(atoi(id) % 2 == 0){
+    if(id_int % 2 == 0){
+      fd_set descriptors;
+      FD_ZERO(&descriptors);
+      FD_SET(client_socket, &descriptors);
+      select(client_socket+1, &descriptors, NULL,NULL,NULL);
       recv(client_socket, my_move, 3,0);
-      int x_cor = atoi(&my_move[0]);
-      int y_cor = atoi(&my_move[2]);
+      int x_cor = my_move[0]-'0';
+      int y_cor = my_move[2]-'0';
 
       board[y_cor][x_cor] = 1;
 
@@ -92,6 +97,10 @@ void subserver_logic(int client_socket, char *id) {
       decsem(board_sem);
     }
     while(1){
+      fd_set descriptors;
+      FD_ZERO(&descriptors);
+      FD_SET(client_socket, &descriptors);
+      select(client_socket+1, &descriptors, NULL,NULL,NULL);
       incsem(board_sem);
 
       //check for a winner
@@ -116,31 +125,31 @@ void subserver_logic(int client_socket, char *id) {
 
         if (v1 == v2 && v2 == v3){
           if(v1 == 1){
-            if(atoi(id) % 2 ==0){
+            if(id_int % 2 ==0){
               opp_move[0] = 4;
               opp_move[1] = 4;
-              states[atoi(id)-1]='W';
+              states[id_int-1]='W';
             }
             else{
               opp_move[0] = 3;
               opp_move[1] = 3;
-              states[atoi(id)-1] = 'L';
+              states[id_int-1] = 'L';
               printf("Client lost, exiting\n");
               exit(0);
             }
           }
           else{
-            if(atoi(id) % 2 ==0){
+            if(id_int % 2 ==0){
               opp_move[0] = 3;
               opp_move[1] = 3;
-              states[atoi(id)-1] = 'L';
+              states[id_int-1] = 'L';
               printf("Client lost, exiting\n");
               exit(0);
             }
             else{
               opp_move[0] = 4;
               opp_move[1] = 4;
-              states[atoi(id)-1] = 'W';
+              states[id_int-1] = 'W';
             }
           }
         }
@@ -149,10 +158,10 @@ void subserver_logic(int client_socket, char *id) {
       send(client_socket, opp_move, 2, 0);
       recv(client_socket, my_move, 3, 0);
 
-      int x_cor = atoi(&my_move[0]);
-      int y_cor = atoi(&my_move[2]);
+      int x_cor = my_move[0]-'0';
+      int y_cor = my_move[2]-'0';
 
-      if(atoi(id)%2==0)board[y_cor][x_cor] = 2;
+      if(id_int%2==0)board[y_cor][x_cor] = 2;
       else{
         board[y_cor][x_cor] = 1;
       }
@@ -214,7 +223,7 @@ static void sighandler(int signo) {
 
 //will figure this out
 char determine_opps(char * states, char * id){
-
+return '0';
 }
 
 int main() {

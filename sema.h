@@ -1,6 +1,3 @@
-#ifndef SEMA_H
-#define SEMA_H
-
 #define STATES_KEY 234987271
 #define BOARD_ONE 233949049
 #define BOARD_TWO 22949049
@@ -17,13 +14,17 @@
 #define MOVE_THREE 67694206
 #define MOVE_FOUR 67694207
 
-union semun {
-  int val;
-  struct semid_ds *buf;
-  unsigned short *array;
-  struct seminfo *__buf;
-};
+#ifndef __APPLE__
+  union semun {
+    int val;
+    struct semid_ds *buf;
+    unsigned short *array;
+    struct seminfo *__buf;
+  };
+#endif
 
+#ifndef SEMA_H
+#define SEMA_H
 void decsem(int sema);
 void incsem(int sema);
 
