@@ -18,3 +18,6 @@ Connect four was too hard, had to pivot. Will instead implement tic tac toe thro
 
 ### 2026-01-12 (at night) - Implementing tic tac toe
 Started by creating the move logic and win/loss handling for the client, then moved on to the server side where I implemented writing the boards in shared memory, then used h files to clean a bunch of stuff up, then developed win-checking conditions. Still need to figure out bracket play after the first game.
+
+### 2026-01-13 (in class and at home) - debugging and head scratching
+Worked on fixing char to int conversions, there is more to be done on the server side as well to make sure everything works.
