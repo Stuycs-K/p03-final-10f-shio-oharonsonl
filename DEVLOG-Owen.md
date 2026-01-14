@@ -39,3 +39,18 @@ to use it in the future for sending game states. Continued to communicate with L
 readying and the actual game & merged.
 
 (1.5 hours)
+
+### 2026-01-10 & 2026-01-11 (Weekend) - Started & made preliminary bracket logic.
+
+Started bracket implementation for multiplayer tictactoe game. Simplified win & lose heavily for mvp
+and used shared memory between clients to track game states (winners and losers). Will be versus the
+sequential enemy until there is one one winner in that array of game states. Need to polish and debug
+a lot for final working version---this is just barebones.
+
+(2 hours)
+
+### 2026-01-13
+
+Restarting/cleaning up client-to-server communication and winning rounds, getting too messy for work.
+Trying to work out brackets, but it's proving to be a lot harder than previously expected. Start
+using semaphores to protect the shared memroy. Still have a lot of debugging to do.
