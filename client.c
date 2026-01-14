@@ -4,14 +4,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/socket.h>
+#include <sys/ioctl.h>
 
 void client_logic(int server_socket) {
   char id;
   recv(server_socket, &id, sizeof(char), 0);
   printf("Recieved: %c\n", id);
 
-  char str_state[256];
+  char str_state[51];
   recv(server_socket, str_state, sizeof(str_state), 0);
+
   struct GameData game = string_to_game_data(str_state);
   print_board(game.board);
 
@@ -32,9 +34,12 @@ void client_logic(int server_socket) {
       printf("Waiting for opponent's move...\n");
     }
 
-    // receive updated game state from server -- this loops infintely idk why
-    char str_state[256];
-    recv(server_socket, str_state, sizeof(str_state), 0);
+    int read_bytes = recv(server_socket, str_state, sizeof(str_state), 0);
+    if (read_bytes == -1) {
+      perror("recv");
+      exit(1);
+    }
+    printf("%d\n", read_bytes);
     game = string_to_game_data(str_state);
     print_board(game.board);
   }

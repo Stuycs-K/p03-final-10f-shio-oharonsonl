@@ -54,9 +54,13 @@ void subserver_logic(int client_socket, char *id) {
   decsem(game_semas[game_index]);
 
   char *state = game_data_to_string(games[game_index]);
-  send(client_socket, state, strlen(state) + 1, 0);
+  send(client_socket, state, sizeof(state), 0);
 
   incsem(game_semas[game_index]);
+
+  while (1) {
+    sleep(1);
+  }
 
   exit(0);
 }
