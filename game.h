@@ -10,4 +10,9 @@ struct GameData {
   enum GAME_STATE state;
 };
 
+void print_game_data(struct GameData *game);
+void print_board(int board[3][3]);
+char *game_data_to_string(struct GameData *game);
+struct GameData string_to_game_data(const char *str);
+
 #endif

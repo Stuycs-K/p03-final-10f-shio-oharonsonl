@@ -1,7 +1,7 @@
 #ifndef SEMA_H
 #define SEMA_H
 
-#define KEY 234987269
+#define KEY 238969842
 
 // union semun {
 //   int val;
@@ -12,5 +12,6 @@
 
 void decsem(int sema);
 void incsem(int sema);
+void waitsem(int sema);
 
 #endif
