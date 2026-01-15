@@ -1,265 +1,408 @@
+#include "game.h"
 #include "networking.h"
-#include "server.h"
+#include "sema.h"
 
-#define EMPTY 0
-#define X 1
-#define O 2
+#include <signal.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/ipc.h>
+#include <sys/sem.h>
+#include <sys/shm.h>
+#include <sys/socket.h>
+#include <unistd.h>
 
 void subserver_logic(int client_socket, char *id) {
-  int states_id = shmget(STATES_KEY, sizeof(char) * PLAYER_NUM, 0);
-  char *states = shmat(states_id, NULL, 0);
+  send(client_socket, &id[0], sizeof(char), 0);
 
-  int board_one = shmget(BOARD_ONE, sizeof(int) * 9, IPC_CREAT | 0664);
-  int board_two = shmget(BOARD_TWO, sizeof(int) * 9, IPC_CREAT | 0664);
-  int board_three = shmget(BOARD_THREE, sizeof(int) * 9, IPC_CREAT | 0664);
-  int board_four = shmget(BOARD_FOUR, sizeof(int) * 9, IPC_CREAT | 0664);
+  int sema = semget(KEY, 1, 0);
+  while (semctl(sema, 0, GETVAL) == 1) {
+    sleep(1);
+  };
 
-  int move_one = shmget(MOVE_ONE, sizeof(char) * 2, IPC_CREAT | 0664);
-  int move_two = shmget(MOVE_TWO, sizeof(char) * 2, IPC_CREAT | 0664);
-  int move_three = shmget(MOVE_THREE, sizeof(char) * 2, IPC_CREAT | 0664);
-  int move_four = shmget(MOVE_FOUR, sizeof(char) * 2, IPC_CREAT | 0664);
+  int game_ids[4] = {shmget(KEY, sizeof(struct GameData), 0664),
+                     shmget(KEY + 1, sizeof(struct GameData), 0664),
+                     shmget(KEY + 2, sizeof(struct GameData), 0664),
+                     shmget(KEY + 3, sizeof(struct GameData), 0664)};
 
-  if (states == (char *)-1) {
-    perror("shmat");
-    exit(1);
-  }
-  printf("Sending %c\n",*id);
-  send(client_socket, id, sizeof(char), 0); // send the client's id
+  int game_semas[4] = {
+      semget(KEY + 10, 1, 0664),
+      semget(KEY + 11, 1, 0664),
+      semget(KEY + 12, 1, 0664),
+      semget(KEY + 13, 1, 0664),
+  };
 
-  int id_int = *id - '0';
+  struct GameData *games[4] = {
+      shmat(game_ids[0], NULL, 0), shmat(game_ids[1], NULL, 0),
+      shmat(game_ids[2], NULL, 0), shmat(game_ids[3], NULL, 0)};
 
-  int sema = semget(STATES_KEY, 1, 0);
-  while (semctl(sema, 0, GETVAL) == 1)
-    ; // wait until PLAYER_NUM clients
+  int game_index = 0;
+  for (int i = 0; i < 4; i++) {
+    waitsem(game_semas[i]);
+    decsem(game_semas[i]);
 
-  send(client_socket, "1", sizeof(char), 0); // tell clients game has started
-
-  //three games
-  char * opp_move;
-  for(int i = 0; i < 3; i++){
-    int (*board)[3];
-    int board_sem;
-    if(i != 0){//update later, for now only one game works
+    if (games[i]->player1 == id[0] || games[i]->player2 == id[0]) {
+      game_index = i;
+      incsem(game_semas[i]);
       break;
-      char opp_id = determine_opps(states, id);
     }
-    else{
 
-      if(*id == '1'||*id=='2'){
-        board = shmat(board_one,0,0);
-        board_sem = semget(BOARD_ONE_SEM, 1, 0);
-        opp_move = shmat(move_one,0,0);
-      }
-      if(*id == '3'||*id=='4'){
-        board = shmat(board_two,0,0);
-        board_sem = semget(BOARD_TWO_SEM, 1, 0);
-        opp_move = shmat(move_two,0,0);
-      }
-      if(*id == '5'||*id=='6'){
-        board = shmat(board_three,0,0);
-        board_sem = semget(BOARD_THREE_SEM, 1, 0);
-        opp_move = shmat(move_three,0,0);
-      }
-      if(*id == '7'||*id=='8'){
-        board = shmat(board_four,0,0);
-        board_sem = semget(BOARD_FOUR_SEM, 1, 0);
-        opp_move = shmat(move_four,0,0);
-      }
-
-      if(id_int % 2 == 0){//first move
-        incsem(board_sem);
-        for(int i = 0; i < 3; i++){
-          for(int j = 0; j < 3; j++){
-            board[i][j] = 0;
-          }
-        }
-      }
-    }
-    //game
-
-    char my_move[3];
-
-    //first move
-    if(id_int % 2 == 0){
-      fd_set descriptors;
-      FD_ZERO(&descriptors);
-      FD_SET(client_socket, &descriptors);
-      select(client_socket+1, &descriptors, NULL,NULL,NULL);
-      recv(client_socket, my_move, 3,0);
-      int x_cor = my_move[0]-'0';
-      int y_cor = my_move[2]-'0';
-
-      board[y_cor][x_cor] = 1;
-
-      opp_move[0] = my_move[0];
-      opp_move[1] = my_move[2];
-
-      decsem(board_sem);
-    }
-    while(1){
-      fd_set descriptors;
-      FD_ZERO(&descriptors);
-      FD_SET(client_socket, &descriptors);
-      select(client_socket+1, &descriptors, NULL,NULL,NULL);
-      incsem(board_sem);
-
-      //check for a winner
-      int lines[8][3] = {//all winning lines
-        {0, 1, 2}, {3, 4, 5}, {6, 7, 8}, // rows
-        {0, 3, 6}, {1, 4, 7}, {2, 5, 8}, // cols
-        {0, 4, 8}, {2, 4, 6}             // diags
-      };
-
-      for (int i = 0; i < 8; i++) {
-        int a = lines[i][0], b = lines[i][1], c = lines[i][2];
-
-        int ar = a / 3, ac = a % 3;
-        int br = b / 3, bc = b % 3;
-        int cr = c / 3, cc = c % 3;
-
-        int v1 = board[ar][ac];
-        if (v1 == EMPTY) continue; // can't win with empties
-
-        int v2 = board[br][bc];
-        int v3 = board[cr][cc];
-
-        if (v1 == v2 && v2 == v3){
-          if(v1 == 1){
-            if(id_int % 2 ==0){
-              opp_move[0] = '4';
-              opp_move[1] = '4';
-              states[id_int-1]='W';
-            }
-            else{
-              opp_move[0] = '3';
-              opp_move[1] = '3';
-              states[id_int-1] = 'L';
-              printf("Client lost, exiting\n");
-              exit(0);
-            }
-          }
-          else{
-            if(id_int % 2 ==0){
-              opp_move[0] = '3';
-              opp_move[1] = '3';
-              states[id_int-1] = 'L';
-              printf("Client lost, exiting\n");
-              exit(0);
-            }
-            else{
-              opp_move[0] = '4';
-              opp_move[1] = '4';
-              states[id_int-1] = 'W';
-            }
-          }
-        }
-      }
-
-      send(client_socket, opp_move, 2, 0);
-      recv(client_socket, my_move, 3, 0);
-
-      int x_cor = my_move[0]-'0';
-      int y_cor = my_move[2]-'0';
-
-      if(id_int%2==0)board[y_cor][x_cor] = 2;
-      else{
-        board[y_cor][x_cor] = 1;
-      }
-
-      opp_move[0] = my_move[0];
-      opp_move[1] = my_move[2];
-
-      decsem(board_sem);
-    }
-    shmdt(board);
-    shmdt(opp_move);
-  }
-  // game logic
-
-  printf("Current game states:\n");
-  for (int i = 0; i < PLAYER_NUM; i++) {
-    printf("Player %d: %c\n", i + 1, states[i]);
+    incsem(game_semas[i]);
   }
 
-  // loop until all players have finished
-  int finished = 0;
-  while (!finished) {
-    finished = 1;
-    for (int i = 0; i < PLAYER_NUM; i++) {
-      if (states[i] != 'W' && states[i] != 'L') {
-        finished = 0;
-        break;
+  waitsem(game_semas[game_index]);
+  decsem(game_semas[game_index]);
+
+  char *state = game_data_to_string(games[game_index]);
+  send(client_socket, state, strlen(state) + 1, 0);
+
+  incsem(game_semas[game_index]);
+
+  // recv a move if currently playing
+  while (games[game_index]->state != P1_WIN &&
+         games[game_index]->state != P2_WIN) {
+
+    waitsem(game_semas[game_index]);
+    decsem(game_semas[game_index]);
+
+    int my_turn = (games[game_index]->state == PLAYER_ONE_MOVE &&
+                   games[game_index]->player1 == id[0]) ||
+                  (games[game_index]->state == PLAYER_TWO_MOVE &&
+                   games[game_index]->player2 == id[0]);
+
+    incsem(game_semas[game_index]);
+
+    if (my_turn) {
+      char move[4] = {0};
+      int n = recv(client_socket, move, sizeof(move), 0);
+      if (n <= 0) {
+        perror("recv");
+        exit(1);
+      }
+
+      int row = move[0] - '0';
+      int col = move[1] - '0';
+
+      waitsem(game_semas[game_index]);
+      decsem(game_semas[game_index]);
+
+      int winner = check_winner(games[game_index]->board);
+
+      games[game_index]->board[row][col] =
+          (games[game_index]->state == PLAYER_ONE_MOVE) ? 1 : 2;
+
+      winner = check_winner(games[game_index]->board);
+      if (winner == 1) {
+        games[game_index]->state = P1_WIN;
+      } else if (winner == 2) {
+        games[game_index]->state = P2_WIN;
+      } else {
+        games[game_index]->state = (games[game_index]->state == PLAYER_ONE_MOVE)
+                                       ? PLAYER_TWO_MOVE
+                                       : PLAYER_ONE_MOVE;
+      }
+
+      char *new_state = game_data_to_string(games[game_index]);
+
+      incsem(game_semas[game_index]); // unlock
+
+      send(client_socket, new_state, strlen(new_state) + 1, 0);
+    } else {
+      while (1) {
+        waitsem(game_semas[game_index]);
+        decsem(game_semas[game_index]);
+
+        int now_my_turn = (games[game_index]->state == PLAYER_ONE_MOVE &&
+                           games[game_index]->player1 == id[0]) ||
+                          (games[game_index]->state == PLAYER_TWO_MOVE &&
+                           games[game_index]->player2 == id[0]);
+
+        char *new_state = game_data_to_string(games[game_index]);
+
+        incsem(game_semas[game_index]);
+
+        send(client_socket, new_state, strlen(new_state) + 1, 0);
+
+        if (now_my_turn)
+          break;
+        sleep(1);
       }
     }
+  }
+
+  // if lost, then exit
+  if ((games[game_index]->state == P1_WIN &&
+       games[game_index]->player2 == id[0]) ||
+      (games[game_index]->state == P2_WIN &&
+       games[game_index]->player1 == id[0]))
+    exit(0);
+
+  // players 1-2 or players 5-6 => create new game
+  // if playesr 3-4 or 7-8, search game slot
+
+  // wait until all games are finished
+  while (1) {
+    int active_subservers = 0;
+    for (int i = 0; i < 4; i++) {
+      waitsem(game_semas[i]);
+      decsem(game_semas[i]);
+
+      if (games[i]->player1 != 0 && games[i]->player2 != 0 &&
+          (games[i]->state != P1_WIN && games[i]->state != P2_WIN)) {
+        active_subservers++;
+      }
+
+      incsem(game_semas[i]);
+    }
+
+    if (active_subservers == 0)
+      break;
+
     sleep(1);
   }
-  printf("All players have finished the game.\n");
 
+  //  if (id[0] == '1' || id[0] == '2' || id[0] == '5' || id[0] == '6') {
+  //    waitsem(game_semas[game_index]);
+  //    decsem(game_semas[game_index]);
+  //
+  //    games[game_index]->player1 = id[0];
+  //    games[game_index]->player2 = 0;
+  //    games[game_index]->state = PLAYER_ONE_MOVE;
+  //
+  //    for (int i = 0; i < 3; i++)
+  //      for (int j = 0; j < 3; j++)
+  //        games[game_index]->board[i][j] = 0;
+  //
+  //    incsem(game_semas[game_index]);
+  //  } else {
+  //    for (int i = 0; i < 4; i++) {
+  //      waitsem(game_semas[i]);
+  //      decsem(game_semas[i]);
+  //
+  //      if (games[i]->player2 == 0) {
+  //        game_index = i;
+  //        games[i]->player2 = id[0];
+  //        incsem(game_semas[i]);
+  //        break;
+  //      }
+  //
+  //      incsem(game_semas[i]);
+  //    }
+  //  }
+  //
+  //  waitsem(game_semas[game_index]);
+  //  decsem(game_semas[game_index]);
+  //
+  //  char *state2 = game_data_to_string(games[game_index]);
+  //  send(client_socket, state, strlen(state2) + 1, 0);
+  //
+  //  incsem(game_semas[game_index]);
+  //
+  //  // play again
+  //  // recv a move if currently playing
+  //  while (games[game_index]->state != P1_WIN &&
+  //         games[game_index]->state != P2_WIN) {
+  //
+  //    waitsem(game_semas[game_index]);
+  //    decsem(game_semas[game_index]);
+  //
+  //    int my_turn = (games[game_index]->state == PLAYER_ONE_MOVE &&
+  //                   games[game_index]->player1 == id[0]) ||
+  //                  (games[game_index]->state == PLAYER_TWO_MOVE &&
+  //                   games[game_index]->player2 == id[0]);
+  //
+  //    incsem(game_semas[game_index]);
+  //
+  //    if (my_turn) {
+  //      char move[4] = {0};
+  //      int n = recv(client_socket, move, sizeof(move), 0);
+  //      if (n <= 0) {
+  //        perror("recv");
+  //        exit(1);
+  //      }
+  //
+  //      int row = move[0] - '0';
+  //      int col = move[1] - '0';
+  //
+  //      waitsem(game_semas[game_index]);
+  //      decsem(game_semas[game_index]);
+  //
+  //      int winner = check_winner(games[game_index]->board);
+  //
+  //      games[game_index]->board[row][col] =
+  //          (games[game_i4 subservers exitndex]->state == PLAYER_ONE_MOVE) ? 1
+  //          : 2;
+  //
+  //      winner = check_winner(games[game_index]->board);
+  //      if (winner == 1) {
+  //        games[game_index]->state = P1_WIN;
+  //      } else if (winner == 2) {
+  //        games[game_index]->state = P2_WIN;
+  //      } else {
+  //        games[game_index]->state = (games[game_index]->state ==
+  //        PLAYER_ONE_MOVE)
+  //                                       ? PLAYER_TWO_MOVE
+  //                                       : PLAYER_ONE_MOVE;
+  //      }
+  //
+  //      char *new_state = game_data_to_string(games[game_index]);
+  //
+  //      incsem(game_semas[game_index]); // unlock
+  //
+  //      send(client_socket, new_state, strlen(new_state) + 1, 0);
+  //    } else {
+  //      while (1) {
+  //        waitsem(game_semas[game_index]);
+  //        decsem(game_semas[game_index]);
+  //
+  //        int now_my_turn = (games[game_index]->state == PLAYER_ONE_MOVE &&
+  //                           games[game_index]->player1 == id[0]) ||
+  //                          (games[game_index]->state == PLAYER_TWO_MOVE &&
+  //                           games[game_index]->player2 == id[0]);
+  //
+  //        char *new_state = game_data_to_string(games[game_index]);
+  //
+  //        incsem(game_semas[game_index]);
+  //
+  //        send(client_socket, new_state, strlen(new_state) + 1, 0);
+  //
+  //        if (now_my_turn)
+  //          break;
+  //        sleep(1);
+  //      }
+  //    }
+  //  }
+  //
+  //  // if lost, then exit
+  //  if ((games[game_index]->state == P1_WIN &&
+  //       games[game_index]->player2 == id[0]) ||
+  //      (games[game_index]->state == P2_WIN &&
+  //       games[game_index]->player1 == id[0]))
+  //    exit(0);
 
-
-  shmdt(states);
-  exit(0); // Must exit the fork
+  exit(0);
 }
 
 // remove shared memory on quit
 static void sighandler(int signo) {
   if (signo == SIGINT) {
-    int states = shmget(STATES_KEY, sizeof(int), 0);
-    int board_one = shmget(STATES_KEY, sizeof(int), 0);
-    int board_two = shmget(STATES_KEY, sizeof(int), 0);
-    int board_three= shmget(STATES_KEY, sizeof(int), 0);
-    int board_four= shmget(STATES_KEY, sizeof(int), 0);
-    int sema = semget(STATES_KEY, 1, 0);
-
-    shmctl(states, IPC_RMID, 0);
-    shmctl(board_one, IPC_RMID, 0);
-    shmctl(board_two, IPC_RMID, 0);
-    shmctl(board_three, IPC_RMID, 0);
-    shmctl(board_four, IPC_RMID, 0);
+    int sema = semget(KEY, 1, 0);
     semctl(sema, IPC_RMID, 0);
+
+    int game_ids[4] = {
+        shmget(KEY, sizeof(struct GameData), 0664),
+        shmget(KEY + 1, sizeof(struct GameData), 0664),
+        shmget(KEY + 2, sizeof(struct GameData), 0664),
+        shmget(KEY + 3, sizeof(struct GameData), 0664),
+    };
+
+    int game_semas[4] = {
+        semget(KEY + 10, 1, 0664),
+        semget(KEY + 11, 1, 0664),
+        semget(KEY + 12, 1, 0664),
+        semget(KEY + 13, 1, 0664),
+    };
+
+    for (int i = 0; i < 4; i++) {
+      semctl(game_semas[i], IPC_RMID, 0);
+      shmctl(game_ids[i], IPC_RMID, 0);
+    }
+
     exit(1);
   }
-}
-
-//will figure this out
-char determine_opps(char * states, char * id){
-return '0';
 }
 
 int main() {
   signal(SIGINT, sighandler);
   int server_socket = server_setup();
 
-  int states = shmget(STATES_KEY, sizeof(char) * PLAYER_NUM, IPC_CREAT | 0664);
-  int board_one = shmget(BOARD_ONE, sizeof(int) * 9, IPC_CREAT | 0664);
-  int board_two = shmget(BOARD_TWO, sizeof(int) * 9, IPC_CREAT | 0664);
-  int board_three = shmget(BOARD_THREE, sizeof(int) * 9, IPC_CREAT | 0664);
-  int board_four = shmget(BOARD_FOUR, sizeof(int) * 9, IPC_CREAT | 0664);
+  int game_ids[4] = {
+      shmget(KEY, sizeof(struct GameData), IPC_CREAT | IPC_EXCL | 0664),
+      shmget(KEY + 1, sizeof(struct GameData), IPC_CREAT | IPC_EXCL | 0664),
+      shmget(KEY + 2, sizeof(struct GameData), IPC_CREAT | IPC_EXCL | 0664),
+      shmget(KEY + 3, sizeof(struct GameData), IPC_CREAT | IPC_EXCL | 0664)};
 
-  int move_one = shmget(MOVE_ONE, sizeof(char) * 2, IPC_CREAT | 0664);
-  int move_two = shmget(MOVE_TWO, sizeof(char) * 2, IPC_CREAT | 0664);
-  int move_three = shmget(MOVE_THREE, sizeof(char) * 2, IPC_CREAT | 0664);
-  int move_four = shmget(MOVE_FOUR, sizeof(char) * 2, IPC_CREAT | 0664);
+  struct GameData *games[4] = {
+      shmat(game_ids[0], NULL, 0), shmat(game_ids[1], NULL, 0),
+      shmat(game_ids[2], NULL, 0), shmat(game_ids[3], NULL, 0)};
 
-  int sema = semget(STATES_KEY, 1, IPC_CREAT | IPC_EXCL | 0664);
+  int game_semas[4] = {
+      semget(KEY + 10, 1, IPC_CREAT | IPC_EXCL | 0664),
+      semget(KEY + 11, 1, IPC_CREAT | IPC_EXCL | 0664),
+      semget(KEY + 12, 1, IPC_CREAT | IPC_EXCL | 0664),
+      semget(KEY + 13, 1, IPC_CREAT | IPC_EXCL | 0664),
+  };
+
+  for (int i = 0; i < 4; i++) {
+    union semun us;
+    us.val = 1;
+    semctl(game_semas[i], 0, SETVAL, us);
+  }
+
+  // GAME ONE
+  waitsem(game_semas[0]);
+  decsem(game_semas[0]);
+
+  games[0]->player1 = '1';
+  games[0]->state = PLAYER_ONE_MOVE;
+  games[0]->player2 = '2';
+
+  for (int i = 0; i < 3; i++)
+    for (int j = 0; j < 3; j++)
+      games[0]->board[i][j] = 0;
+
+  incsem(game_semas[0]);
+
+  // GAME 2
+  waitsem(game_semas[1]);
+  decsem(game_semas[1]);
+
+  games[1]->player1 = '3';
+  games[1]->state = PLAYER_ONE_MOVE;
+  games[1]->player2 = '4';
+
+  for (int i = 0; i < 3; i++)
+    for (int j = 0; j < 3; j++)
+      games[1]->board[i][j] = 0;
+
+  incsem(game_semas[1]);
+
+  // GAME 3
+  waitsem(game_semas[2]);
+  decsem(game_semas[2]);
+
+  games[2]->player1 = '5';
+  games[2]->state = PLAYER_ONE_MOVE;
+  games[2]->player2 = '6';
+
+  for (int i = 0; i < 3; i++)
+    for (int j = 0; j < 3; j++)
+      games[2]->board[i][j] = 0;
+
+  incsem(game_semas[2]);
+
+  // GAME 4
+  waitsem(game_semas[3]);
+  decsem(game_semas[3]);
+
+  games[3]->player1 = '7';
+  games[3]->state = PLAYER_ONE_MOVE;
+  games[3]->player2 = '8';
+
+  for (int i = 0; i < 3; i++)
+    for (int j = 0; j < 3; j++)
+      games[3]->board[i][j] = 0;
+
+  incsem(game_semas[3]);
+
+  int sema =
+      semget(KEY, 1, IPC_CREAT | IPC_EXCL | 0664); // semaphore for game start
   union semun us;
   us.val = 1;
   semctl(sema, 0, SETVAL, us);
 
-  int board_sem[4];
-  board_sem[0] = semget(BOARD_ONE_SEM, 1, IPC_CREAT | 0644);
-  board_sem[1] = semget(BOARD_TWO_SEM, 1, IPC_CREAT | 0644);
-  board_sem[2] = semget(BOARD_THREE_SEM, 1, IPC_CREAT | 0644);
-  board_sem[3] = semget(BOARD_FOUR_SEM, 1, IPC_CREAT | 0644);
-  for(int i = 0; i < 4; i++){
-    union semun us;
-    us.val = 1;
-    semctl(board_sem[i], 0, SETVAL, us);
-  }
-
-
   int clients = 0;
-  while (clients < PLAYER_NUM) {
+  while (clients < 8) {
     int client_socket = server_tcp_handshake(server_socket);
     printf("A CLIENT HAS BEEN CONNECTED\n");
     clients++;
@@ -276,13 +419,7 @@ int main() {
       subserver_logic(client_socket, buf);
     }
   }
-
   decsem(sema);
 
-  for (int i = 0; i < PLAYER_NUM; i++)
-    wait(NULL); // wait for all child processes
-
-  // remove later I think
-  shmctl(states, IPC_RMID, 0); // remove the segment
   semctl(sema, IPC_RMID, 0);
 }
