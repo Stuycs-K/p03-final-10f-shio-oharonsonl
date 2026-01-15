@@ -53,4 +53,12 @@ a lot for final working version---this is just barebones.
 
 Restarting/cleaning up client-to-server communication and winning rounds, getting too messy for work.
 Trying to work out brackets, but it's proving to be a lot harder than previously expected. Start
-using semaphores to protect the shared memroy. Still have a lot of debugging to do.
+using semaphores to protect the shared memroy. Still have a lot of debugging to do (doesn't block?).
+
+### 2026-01-14
+
+Finished first bracket round of tic tac toe games and starting out semi finals and final brackets. Debugged
+blocking issue from the previous day (closed socket), etc. Also add in Louis's tic tac toe ending logic. Merging
+with main branch now.
+
+(2 hours)
