@@ -61,5 +61,3 @@ int client_tcp_handshake(char *server_addr) {
 
   return server_socket;
 }
-
-
