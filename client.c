@@ -17,7 +17,7 @@ void client_logic(int server_socket) {
 
   printf("GAME STARTS NOW! You are player #%c\n", id);
 
-  while (game.state != WIN && game.state != LOSE && game.state != STALEMATE) {
+  while (game.state != P1_WIN && game.state != P2_WIN) {
     if ((game.state == PLAYER_ONE_MOVE && game.player1 == id) ||
         (game.state == PLAYER_TWO_MOVE && game.player2 == id)) {
       int row, col;
@@ -40,6 +40,14 @@ void client_logic(int server_socket) {
     printf("%d\n", read_bytes);
     game = string_to_game_data(str_state);
     print_board(game.board);
+  }
+
+  // if lost, then exit
+  if ((game.state == P1_WIN && game.player2 == id) ||
+      (game.state == P2_WIN && game.player1 == id)) {
+    printf("You lost the game!\n");
+  } else {
+    printf("You won the game!\n");
   }
 }
 

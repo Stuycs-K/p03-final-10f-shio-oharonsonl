@@ -59,46 +59,117 @@ void subserver_logic(int client_socket, char *id) {
   incsem(game_semas[game_index]);
 
   // recv a move if currently playing
+  while (games[game_index]->state != P1_WIN &&
+         games[game_index]->state != P2_WIN) {
 
-  waitsem(game_semas[game_index]);
-  decsem(game_semas[game_index]);
-
-  if ((games[game_index]->state == PLAYER_ONE_MOVE &&
-       games[game_index]->player1 == id[0]) ||
-      (games[game_index]->state == PLAYER_TWO_MOVE &&
-       games[game_index]->player2 == id[0])) {
-    char move[4];
-    int n = recv(client_socket, move, sizeof(move), 0);
-    if (n == -1) {
-      perror("recv");
-      exit(1);
-    }
-    printf("Bytes received: %d\n", n);
-    int row = move[0] - '0';
-    int col = move[1] - '0';
-
-    games[game_index]->board[row][col] =
-        (games[game_index]->state == PLAYER_ONE_MOVE) ? 1 : 2;
-    games[game_index]->state = (games[game_index]->state == PLAYER_ONE_MOVE)
-                                   ? PLAYER_TWO_MOVE
-                                   : PLAYER_ONE_MOVE;
-
-    char *new_state = game_data_to_string(games[game_index]);
-    send(client_socket, new_state, strlen(new_state) + 1, 0);
-  }
-
-  else {
     waitsem(game_semas[game_index]);
+    decsem(game_semas[game_index]);
 
-    while ((games[game_index]->state == PLAYER_ONE_MOVE &&
-            games[game_index]->player1 != id[0]) ||
-           (games[game_index]->state == PLAYER_TWO_MOVE &&
-            games[game_index]->player2 != id[0])) {
-      sleep(1);
+    int my_turn = (games[game_index]->state == PLAYER_ONE_MOVE &&
+                   games[game_index]->player1 == id[0]) ||
+                  (games[game_index]->state == PLAYER_TWO_MOVE &&
+                   games[game_index]->player2 == id[0]);
+
+    incsem(game_semas[game_index]);
+
+    if (my_turn) {
+      char move[4] = {0};
+      int n = recv(client_socket, move, sizeof(move), 0);
+      if (n <= 0) {
+        perror("recv");
+        exit(1);
+      }
+
+      int row = move[0] - '0';
+      int col = move[1] - '0';
+
+      waitsem(game_semas[game_index]);
+      decsem(game_semas[game_index]);
+
+      int winner = check_winner(games[game_index]->board);
+
+      games[game_index]->board[row][col] =
+          (games[game_index]->state == PLAYER_ONE_MOVE) ? 1 : 2;
+
+      winner = check_winner(games[game_index]->board);
+      if (winner == 1) {
+        games[game_index]->state = P1_WIN;
+      } else if (winner == 2) {
+        games[game_index]->state = P2_WIN;
+      } else {
+        games[game_index]->state = (games[game_index]->state == PLAYER_ONE_MOVE)
+                                       ? PLAYER_TWO_MOVE
+                                       : PLAYER_ONE_MOVE;
+      }
+
+      char *new_state = game_data_to_string(games[game_index]);
+
+      incsem(game_semas[game_index]); // unlock
+
+      send(client_socket, new_state, strlen(new_state) + 1, 0);
+    } else {
+      while (1) {
+        waitsem(game_semas[game_index]);
+        decsem(game_semas[game_index]);
+
+        int now_my_turn = (games[game_index]->state == PLAYER_ONE_MOVE &&
+                           games[game_index]->player1 == id[0]) ||
+                          (games[game_index]->state == PLAYER_TWO_MOVE &&
+                           games[game_index]->player2 == id[0]);
+
+        char *new_state = game_data_to_string(games[game_index]);
+
+        incsem(game_semas[game_index]);
+
+        send(client_socket, new_state, strlen(new_state) + 1, 0);
+
+        if (now_my_turn)
+          break;
+        sleep(1);
+      }
     }
   }
 
-  incsem(game_semas[game_index]);
+  // if lost, then exit
+  if ((games[game_index]->state == P1_WIN &&
+       games[game_index]->player2 == id[0]) ||
+      (games[game_index]->state == P2_WIN &&
+       games[game_index]->player1 == id[0]))
+    exit(0);
+
+  // players 1-2 or players 5-6 => create new game
+  // if playesr 3-4 or 7-8, search game slot
+
+  if (id[0] == '1' || id[0] == '2' || id[0] == '5' || id[0] == '6') {
+    waitsem(game_semas[game_index]);
+    decsem(game_semas[game_index]);
+
+    games[game_index]->player1 = id[0];
+    games[game_index]->player2 = 0;
+    games[game_index]->state = PLAYER_ONE_MOVE;
+
+    for (int i = 0; i < 3; i++)
+      for (int j = 0; j < 3; j++)
+        games[game_index]->board[i][j] = 0;
+
+    incsem(game_semas[game_index]);
+  } else {
+    for (int i = 0; i < 4; i++) {
+      waitsem(game_semas[i]);
+      decsem(game_semas[i]);
+
+      if (games[i]->player2 == 0) {
+        game_index = i;
+        games[i]->player2 = id[0];
+        incsem(game_semas[i]);
+        break;
+      }
+
+      incsem(game_semas[i]);
+    }
+  }
+
+  // play again
 
   while (1) {
     sleep(1);
