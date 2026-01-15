@@ -46,9 +46,47 @@ void client_logic(int server_socket) {
   if ((game.state == P1_WIN && game.player2 == id) ||
       (game.state == P2_WIN && game.player1 == id)) {
     printf("You lost the game!\n");
-  } else {
-    printf("You won the game!\n");
+    exit(0);
   }
+
+  printf("You won the game!\n");
+
+  recv(server_socket, str_state, sizeof(str_state), 0);
+  game = string_to_game_data(str_state);
+
+  while (game.state != P1_WIN && game.state != P2_WIN) {
+    if ((game.state == PLAYER_ONE_MOVE && game.player1 == id) ||
+        (game.state == PLAYER_TWO_MOVE && game.player2 == id)) {
+      int row, col;
+      printf(
+          "Your move! Enter row and column (0, 1, or 2) separated by space: ");
+      scanf("%d %d", &row, &col);
+
+      char move[4];
+      snprintf(move, sizeof(move), "%d%d", row, col);
+      send(server_socket, move, sizeof(move), 0);
+    } else {
+      printf("Waiting for opponent's move...\n");
+    }
+
+    int read_bytes = recv(server_socket, str_state, sizeof(str_state), 0);
+    if (read_bytes == -1) {
+      perror("recv");
+      exit(1);
+    }
+    printf("%d\n", read_bytes);
+    game = string_to_game_data(str_state);
+    print_board(game.board);
+  }
+
+  // if lost, then exit
+  if ((game.state == P1_WIN && game.player2 == id) ||
+      (game.state == P2_WIN && game.player1 == id)) {
+    printf("You lost the game!\n");
+    exit(0);
+  }
+
+  printf("You won the game!\n");
 }
 
 int main(int argc, char *argv[]) {
