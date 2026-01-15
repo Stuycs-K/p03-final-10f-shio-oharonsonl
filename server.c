@@ -37,7 +37,7 @@ void subserver_logic(int client_socket, char *id) {
   //three games
   char * opp_move;
   for(int i = 0; i < 3; i++){
-    int** board;
+    int (*board)[3];
     int board_sem;
     if(i != 0){//update later, for now only one game works
       break;
@@ -126,13 +126,13 @@ void subserver_logic(int client_socket, char *id) {
         if (v1 == v2 && v2 == v3){
           if(v1 == 1){
             if(id_int % 2 ==0){
-              opp_move[0] = 4;
-              opp_move[1] = 4;
+              opp_move[0] = '4';
+              opp_move[1] = '4';
               states[id_int-1]='W';
             }
             else{
-              opp_move[0] = 3;
-              opp_move[1] = 3;
+              opp_move[0] = '3';
+              opp_move[1] = '3';
               states[id_int-1] = 'L';
               printf("Client lost, exiting\n");
               exit(0);
@@ -140,15 +140,15 @@ void subserver_logic(int client_socket, char *id) {
           }
           else{
             if(id_int % 2 ==0){
-              opp_move[0] = 3;
-              opp_move[1] = 3;
+              opp_move[0] = '3';
+              opp_move[1] = '3';
               states[id_int-1] = 'L';
               printf("Client lost, exiting\n");
               exit(0);
             }
             else{
-              opp_move[0] = 4;
-              opp_move[1] = 4;
+              opp_move[0] = '4';
+              opp_move[1] = '4';
               states[id_int-1] = 'W';
             }
           }
@@ -247,10 +247,10 @@ int main() {
   semctl(sema, 0, SETVAL, us);
 
   int board_sem[4];
-  board_sem[0] = semget(BOARD_ONE_SEM, 1, 0);
-  board_sem[1] = semget(BOARD_ONE_SEM, 1, 0);
-  board_sem[2] = semget(BOARD_ONE_SEM, 1, 0);
-  board_sem[3] = semget(BOARD_ONE_SEM, 1, 0);
+  board_sem[0] = semget(BOARD_ONE_SEM, 1, IPC_CREAT | 0644);
+  board_sem[1] = semget(BOARD_TWO_SEM, 1, IPC_CREAT | 0644);
+  board_sem[2] = semget(BOARD_THREE_SEM, 1, IPC_CREAT | 0644);
+  board_sem[3] = semget(BOARD_FOUR_SEM, 1, IPC_CREAT | 0644);
   for(int i = 0; i < 4; i++){
     union semun us;
     us.val = 1;

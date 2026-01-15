@@ -89,7 +89,7 @@ void game(int GOING_FIRST, int server_socket){
     }
     else{
       board[y_cor][x_cor] = 1;
-      send(server_socket,my_move,sizeof(my_move),0);
+      send(server_socket,my_move,3,0);
       break;
     }
   }
@@ -118,7 +118,7 @@ void game(int GOING_FIRST, int server_socket){
       printf("You win! Yay!\n");
     }
 
-    if(GOING_FIRST==0)board[y_cor][x_cor] = 2;
+    if(GOING_FIRST==1)board[y_cor][x_cor] = 2;
     else{
       board[y_cor][x_cor] = 1;
     }
@@ -136,8 +136,11 @@ void game(int GOING_FIRST, int server_socket){
       printf("Invalid input! Try again\n");
       }
       else{
-        board[y_cor][x_cor] = 1;
-        send(server_socket,my_move,sizeof(my_move),0);
+        if(GOING_FIRST == 0)board[y_cor][x_cor] = 2;
+        else{
+          board[y_cor][x_cor] = 1;
+        }
+        send(server_socket,my_move,3,0);
         break;
       }
     }
