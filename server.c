@@ -54,7 +54,49 @@ void subserver_logic(int client_socket, char *id) {
   decsem(game_semas[game_index]);
 
   char *state = game_data_to_string(games[game_index]);
-  send(client_socket, state, sizeof(state), 0);
+  send(client_socket, state, strlen(state) + 1, 0);
+
+  incsem(game_semas[game_index]);
+
+  // recv a move if currently playing
+
+  waitsem(game_semas[game_index]);
+  decsem(game_semas[game_index]);
+
+  if ((games[game_index]->state == PLAYER_ONE_MOVE &&
+       games[game_index]->player1 == id[0]) ||
+      (games[game_index]->state == PLAYER_TWO_MOVE &&
+       games[game_index]->player2 == id[0])) {
+    char move[4];
+    int n = recv(client_socket, move, sizeof(move), 0);
+    if (n == -1) {
+      perror("recv");
+      exit(1);
+    }
+    printf("Bytes received: %d\n", n);
+    int row = move[0] - '0';
+    int col = move[1] - '0';
+
+    games[game_index]->board[row][col] =
+        (games[game_index]->state == PLAYER_ONE_MOVE) ? 1 : 2;
+    games[game_index]->state = (games[game_index]->state == PLAYER_ONE_MOVE)
+                                   ? PLAYER_TWO_MOVE
+                                   : PLAYER_ONE_MOVE;
+
+    char *new_state = game_data_to_string(games[game_index]);
+    send(client_socket, new_state, strlen(new_state) + 1, 0);
+  }
+
+  else {
+    waitsem(game_semas[game_index]);
+
+    while ((games[game_index]->state == PLAYER_ONE_MOVE &&
+            games[game_index]->player1 != id[0]) ||
+           (games[game_index]->state == PLAYER_TWO_MOVE &&
+            games[game_index]->player2 != id[0])) {
+      sleep(1);
+    }
+  }
 
   incsem(game_semas[game_index]);
 

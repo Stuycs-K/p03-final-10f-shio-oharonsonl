@@ -1,10 +1,10 @@
-#include "networking.h"
 #include "game.h"
+#include "networking.h"
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/socket.h>
 #include <sys/ioctl.h>
+#include <sys/socket.h>
 
 void client_logic(int server_socket) {
   char id;
@@ -13,9 +13,7 @@ void client_logic(int server_socket) {
 
   char str_state[51];
   recv(server_socket, str_state, sizeof(str_state), 0);
-
   struct GameData game = string_to_game_data(str_state);
-  print_board(game.board);
 
   printf("GAME STARTS NOW! You are player #%c\n", id);
 
@@ -23,10 +21,10 @@ void client_logic(int server_socket) {
     if ((game.state == PLAYER_ONE_MOVE && game.player1 == id) ||
         (game.state == PLAYER_TWO_MOVE && game.player2 == id)) {
       int row, col;
-      printf("Your move! Enter row and column (0, 1, or 2) separated by space: ");
+      printf(
+          "Your move! Enter row and column (0, 1, or 2) separated by space: ");
       scanf("%d %d", &row, &col);
 
-      // send move to server
       char move[4];
       snprintf(move, sizeof(move), "%d%d", row, col);
       send(server_socket, move, sizeof(move), 0);
