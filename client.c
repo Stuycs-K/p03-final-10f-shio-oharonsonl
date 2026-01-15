@@ -49,7 +49,7 @@ void client_logic(int server_socket) {
     exit(0);
   }
 
-  printf("You won the game!\n");
+  printf("You won the game! Waiting for other players...\n");
 
   recv(server_socket, str_state, sizeof(str_state), 0);
   game = string_to_game_data(str_state);

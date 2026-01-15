@@ -166,35 +166,62 @@ void subserver_logic(int client_socket, char *id) {
     sleep(1);
   }
 
-  //  if (id[0] == '1' || id[0] == '2' || id[0] == '5' || id[0] == '6') {
-  //    waitsem(game_semas[game_index]);
-  //    decsem(game_semas[game_index]);
-  //
-  //    games[game_index]->player1 = id[0];
-  //    games[game_index]->player2 = 0;
-  //    games[game_index]->state = PLAYER_ONE_MOVE;
-  //
-  //    for (int i = 0; i < 3; i++)
-  //      for (int j = 0; j < 3; j++)
-  //        games[game_index]->board[i][j] = 0;
-  //
-  //    incsem(game_semas[game_index]);
-  //  } else {
-  //    for (int i = 0; i < 4; i++) {
-  //      waitsem(game_semas[i]);
-  //      decsem(game_semas[i]);
-  //
-  //      if (games[i]->player2 == 0) {
-  //        game_index = i;
-  //        games[i]->player2 = id[0];
-  //        incsem(game_semas[i]);
-  //        break;
-  //      }
-  //
-  //      incsem(game_semas[i]);
-  //    }
-  //  }
-  //
+  // reset the game state
+  waitsem(game_semas[game_index]);
+  decsem(game_semas[game_index]);
+
+  games[game_index]->player1 = 0;
+  games[game_index]->player2 = 0;
+  games[game_index]->state = PLAYER_ONE_MOVE;
+  for (int i = 0; i < 3; i++)
+    for (int j = 0; j < 3; j++)
+      games[game_index]->board[i][j] = 0;
+
+  incsem(game_semas[game_index]);
+
+  // assign players
+
+  if (id[0] == '1' || id[0] == '2' || id[0] == '5' || id[0] == '6') {
+    game_index = (id[0] == '1' || id[0] == '2') ? 0 : 1;
+
+    waitsem(game_semas[game_index]);
+    decsem(game_semas[game_index]);
+
+    if (games[game_index]->player1 == 0 && games[game_index]->player2 == 0) {
+      games[game_index]->state = PLAYER_ONE_MOVE;
+      for (int i = 0; i < 3; i++)
+        for (int j = 0; j < 3; j++)
+          games[game_index]->board[i][j] = 0;
+    }
+
+    games[game_index]->player1 = id[0];
+    incsem(game_semas[game_index]);
+
+  } else {
+    int target = (id[0] == '3' || id[0] == '4') ? 0 : 1;
+
+    while (1) {
+      waitsem(game_semas[target]);
+      decsem(game_semas[target]);
+
+      if (games[target]->player1 != 0 && games[target]->player2 == 0) {
+        games[target]->player2 = id[0];
+        game_index = target;
+
+        incsem(game_semas[target]);
+        break;
+      }
+
+      incsem(game_semas[target]);
+      sleep(1);
+    }
+  }
+
+  waitsem(game_semas[game_index]);
+  decsem(game_semas[game_index]);
+  print_game_data(games[game_index]);
+  incsem(game_semas[game_index]);
+
   //  waitsem(game_semas[game_index]);
   //  decsem(game_semas[game_index]);
   //
