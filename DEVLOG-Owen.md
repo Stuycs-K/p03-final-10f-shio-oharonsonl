@@ -55,6 +55,8 @@ Restarting/cleaning up client-to-server communication and winning rounds, gettin
 Trying to work out brackets, but it's proving to be a lot harder than previously expected. Start
 using semaphores to protect the shared memroy. Still have a lot of debugging to do (doesn't block?).
 
+(2 hours)
+
 ### 2026-01-14
 
 Finished first bracket round of tic tac toe games and starting out semi finals and final brackets. Debugged

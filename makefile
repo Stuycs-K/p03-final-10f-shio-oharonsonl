@@ -20,6 +20,6 @@ client.o: client.c networking.h sema.h
 server.o: server.c networking.h sema.h
 	@gcc -c server.c
 clean:
-	@rm -r *.o
-	@rm -r server
-	@rm -r client
+	@rm -f *.o
+	@rm -f server
+	@rm -f client

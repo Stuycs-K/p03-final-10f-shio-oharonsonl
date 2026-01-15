@@ -61,20 +61,3 @@ int client_tcp_handshake(char *server_addr) {
 
   return server_socket;
 }
-
-ssize_t recv_cstring(int sock, char *buf, size_t max) {
-  size_t i = 0;
-  while (i + 1 < max) {
-    char c;
-    ssize_t n = recv(sock, &c, 1, 0);
-    if (n == 0) return 0;
-    if (n < 0) {
-      if (errno == EINTR) continue;
-      return -1;
-    }
-    buf[i++] = c;
-    if (c == '\0') return (ssize_t)i;
-  }
-  buf[max - 1] = '\0';
-  return (ssize_t)max;
-}
