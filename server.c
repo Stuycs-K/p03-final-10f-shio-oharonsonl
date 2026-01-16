@@ -314,7 +314,7 @@ void subserver_logic(int client_socket, char *id) {
 
         if (now_my_turn)
           break;
-        usleep(1e6 / 2);
+        usleep(2e6);
       }
     }
   }
@@ -344,7 +344,7 @@ void subserver_logic(int client_socket, char *id) {
     if (active_subservers == 0)
       break;
 
-    usleep(1e6 / 2);
+    usleep(2e6);
   }
 
   // reset game state for 1st game

@@ -78,6 +78,12 @@ void client_logic(int server_socket) {
         continue;
       }
 
+      if (game.board[row][col] != 0 && !(row == 9 && col == 9)) {
+        printf("Cell already occupied! Try again.\n");
+        continue;
+      }
+
+
       char move[4];
       snprintf(move, sizeof(move), "%d%d", row, col);
       send(server_socket, move, sizeof(move), 0);
@@ -119,6 +125,12 @@ void client_logic(int server_socket) {
         printf("Invalid move! Try again.\n");
         continue;
       }
+ 
+       if (game.board[row][col] != 0 && !(row == 9 && col == 9)) {
+        printf("Cell already occupied! Try again.\n");
+        continue;
+      }
+
 
       char move[4];
       snprintf(move, sizeof(move), "%d%d", row, col);
