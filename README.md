@@ -33,7 +33,7 @@ Well, there are a few ways!
 
 First, if you are weird (or testing functionality) and want to play a bunch of tic tac toe games against yourself, we recommend that you use tmux so that you can run the 8 clients necessary, since all 8 clients must be connected for games to start. Tmux usage allows you to not open 9 windows on your machine, but may limit scrolling potential.
 
-Second, if you are more normal and want to play with friends, you can have one person set up the server and share its IP address and port (provided the port is set up to allow outside connections), then all 8 friends can connect (hopefully you don't have more because that feature hasn't been released yet)! From then on, you just play 1-3 normal games of tic tac toe (depending, of course, upon if you win or lose), until a champion is crowned at the end! Don't tell anyone, but if you pay us $50 (literally enter "$50" as a move), you can have player 1 automatically win! Just maybe don't do this if you're player 2.
+Second, if you are more normal and want to play with friends, you can have one person set up the server and share its IP address and port (provided the port is set up to allow outside connections), then all 8 friends can connect (hopefully you don't have more because that feature hasn't been released yet)! From then on, you just play 1-3 normal games of tic tac toe (depending, of course, upon if you win or lose), until a champion is crowned at the end! Don't tell anyone, but if you pay us $50 (literally enter "$50" as a move), player 1 will instantly win! Perhaps just maybe don't enter the cheat code when you're player 2 (the lower seed).
 
 ### Resources/ References:
 
