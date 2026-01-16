@@ -1,7 +1,7 @@
 .PHONY: server-run client-run server-compile client-compile clean
 server-run: server
-	@killall server || true
-	@killall client || true
+	@killall server > /dev/null 2>&1 || true
+	@killall client > /dev/null 2>&1 || true
 	@./server
 client-run: client
 	@./client
