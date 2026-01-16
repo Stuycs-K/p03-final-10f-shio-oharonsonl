@@ -262,9 +262,6 @@ void subserver_logic(int client_socket, char *id) {
     if (my_turn) {
       char move[4] = {0};
       int n = recv(client_socket, move, sizeof(move), 0);
-      if (n == 0){
-        winner = (games[game_index]->state == PLAYER_ONE_MOVE) ? 2 : 1;
-      }
       if (n < 0) {
         perror("recv");
         exit(1);
@@ -448,9 +445,6 @@ void subserver_logic(int client_socket, char *id) {
     if (my_turn) {
       char move[4] = {0};
       int n = recv(client_socket, move, sizeof(move), 0);
-      if (n == 0){
-        winner = (games[game_index]->state == PLAYER_ONE_MOVE) ? 2 : 1;
-      }
       if (n < 0) {
         perror("recv");
         exit(1);
