@@ -8,8 +8,7 @@ Owen Shi & Louis Oh-Aronson
 
 ### Project Description:
 
-This is a Connect 4 game with 8 players. The players will be seperated off into
-tournament brackets and compete against one another in rounds for a final
+This is a Tic Tac Toe tournament with 8 players. The players will be separated into tournament brackets and compete against one another in rounds for a final
 winner!
 
 ### Instructions:
@@ -23,12 +22,18 @@ Server Commands:
 
 Client Commands:
 
-- make client-run
+- make client-run (with optional argument of an IP address)
   - Automatically compiles and runs the client
+  - If an IP address and port of a running server are passed, it will connect to that server.
 - make client-compile
   Compiles the client
 
-How does the user interact with this program? (CHANGE THIS!!!!!)
+How does the user interact with this program?
+Well, there are a few ways!
+
+First, if you are weird (or testing functionality) and want to play a bunch of tic tac toe games against yourself, we recommend that you use tmux so that you can run the 8 clients necessary, since all 8 clients must be connected for games to start. Tmux usage allows you to not open 9 windows on your machine, but may limit scrolling potential.
+
+Second, if you are more normal and want to play with friends, you can have one person set up the server and share its IP address and port (provided the port is set up to allow outside connections), then all 8 friends can connect (hopefully you don't have more because that feature hasn't been released yet)! From then on, you just play 1-3 normal games of tic tac toe (depending, of course, upon if you win or lose), until a champion is crowned at the end! Don't tell anyone, but if you pay us $50 (literally enter "$50" as a move), you can have player 1 automatically win! Just maybe don't do this if you're player 2.
 
 ### Resources/ References:
 
