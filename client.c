@@ -49,7 +49,7 @@ void client_logic(int server_socket) {
     exit(0);
   }
 
-  printf("You won the game! Waiting for others...\n");
+  printf("You won the qualifiers! Waiting for others...\n");
 
   recv(server_socket, str_state, sizeof(str_state), 0);
   game = string_to_game_data(str_state);
@@ -74,7 +74,6 @@ void client_logic(int server_socket) {
       perror("recv");
       exit(1);
     }
-    printf("%d\n", read_bytes);
     game = string_to_game_data(str_state);
     print_board(game.board);
   }
@@ -86,7 +85,7 @@ void client_logic(int server_socket) {
     exit(0);
   }
 
-  printf("You won the game!\n");
+  printf("You won the semifinals! Waiting for the final match...\n");
 }
 
 int main(int argc, char *argv[]) {
