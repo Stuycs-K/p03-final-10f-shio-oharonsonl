@@ -34,7 +34,7 @@ void client_logic(int server_socket) {
             col = my_move[2] - '0';
             //scanf("%d %d", &row, &col);
 
-            if(game.board[col][row] == 0 && col > 0 && col < 2 && row > 0 && row < 2){
+            if(row >= 0 && row <= 2 && col >= 0 && col <= 2 && game.board[row][col] == 0){
               char move[4];
               snprintf(move, sizeof(move), "%d%d", row, col);
               send(server_socket, move, sizeof(move), 0);
@@ -86,7 +86,7 @@ void client_logic(int server_socket) {
             col = my_move[2] - '0';
             //scanf("%d %d", &row, &col);
 
-            if(game.board[col][row] == 0 && col > 0 && col < 2 && row > 0 && row < 2){
+            if(row >= 0 && row <= 2 && col >= 0 && col <= 2 && game.board[row][col] == 0){
               char move[4];
               snprintf(move, sizeof(move), "%d%d", row, col);
               send(server_socket, move, sizeof(move), 0);
@@ -138,7 +138,7 @@ void client_logic(int server_socket) {
             col = my_move[2] - '0';
             //scanf("%d %d", &row, &col);
 
-            if(game.board[col][row] == 0 && col > 0 && col < 2 && row > 0 && row < 2){
+            if(row >= 0 && row <= 2 && col >= 0 && col <= 2 && game.board[row][col] == 0){
               char move[4];
               snprintf(move, sizeof(move), "%d%d", row, col);
               send(server_socket, move, sizeof(move), 0);
