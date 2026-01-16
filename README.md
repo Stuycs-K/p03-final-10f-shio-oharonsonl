@@ -2,6 +2,8 @@
 
 # 8-Player Tournament Tic-Tac-Toe
 
+## [Video](https://drive.google.com/drive/folders/1I9-iHmU-HjgLX_5UfRc2BKjRhqcureSE?usp=sharing)
+
 ### OH!... —WHEN?
 
 Owen Shi & Louis Oh-Aronson
@@ -26,7 +28,7 @@ Like the server, to start the client, simply run a `make client-run` and the cli
 
 To only compile the client (without running), do `make client-compile`
 
-For clients and servers on different IP addresses, you can run `make client-run (IP_ADDRESS)`
+For clients and servers on different IP addresses, you'll have to compile the client and then run `./client {IP_ADDRESS}`.
 
 #### How does the user interact with this program?
 
@@ -35,10 +37,6 @@ Well, there are a few ways!
 First, if you are weird (or testing functionality) and want to play a bunch of tic tac toe games against yourself, we recommend that you use tmux so that you can run the 8 clients necessary, since all 8 clients must be connected for games to start. Tmux usage allows you to not open 9 windows on your machine, but may limit scrolling potential.
 
 Second, if you are more normal and want to play with friends, you can have one person set up the server and share its IP address and port (provided the port is set up to allow outside connections), then all 8 friends can connect (hopefully you don't have more because that feature hasn't been released yet)! From then on, you just play 1-3 normal games of tic tac toe (depending, of course, upon if you win or lose), until a champion is crowned at the end! Don't tell anyone, but if you pay us $50 (literally enter "$50" as a move), player 1 will instantly win! Perhaps just maybe don't enter the cheat code when you're player 2 (the lower seed).
-
-Last but not least, no matter what if you kill the client process at any time during a game and the socket closes, it counts as an immediate forfeit!!
-
-Forfeits and cheat codes will launch players all the way to winning the championship if you are the other player, so keep that in mind!! Match fixing is frowned upon but lucrative if you don't get caught.
 
 ### Resources/ References:
 

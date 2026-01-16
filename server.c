@@ -90,7 +90,7 @@ void subserver_logic(int client_socket, char *id) {
           (games[game_index]->state == PLAYER_ONE_MOVE) ? 1 : 2;
 
       int winner = check_winner(games[game_index]->board);
-      if (n == 0){
+      if (n == 0) {
         winner = (games[game_index]->state == PLAYER_ONE_MOVE) ? 2 : 1;
       }
       if (!strcmp(move, "$50")) {
@@ -278,7 +278,7 @@ void subserver_logic(int client_socket, char *id) {
           (games[game_index]->state == PLAYER_ONE_MOVE) ? 1 : 2;
 
       int winner = check_winner(games[game_index]->board);
-      if (n == 0){
+      if (n == 0) {
         winner = (games[game_index]->state == PLAYER_ONE_MOVE) ? 2 : 1;
       }
       if (!strcmp(move, "$50")) {
@@ -462,7 +462,7 @@ void subserver_logic(int client_socket, char *id) {
           (games[game_index]->state == PLAYER_ONE_MOVE) ? 1 : 2;
 
       int winner = check_winner(games[game_index]->board);
-      if (n == 0){
+      if (n == 0) {
         winner = (games[game_index]->state == PLAYER_ONE_MOVE) ? 2 : 1;
       }
       if (!strcmp(move, "$50")) {
