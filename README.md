@@ -35,6 +35,7 @@ First, if you are weird (or testing functionality) and want to play a bunch of t
 
 Second, if you are more normal and want to play with friends, you can have one person set up the server and share its IP address and port (provided the port is set up to allow outside connections), then all 8 friends can connect (hopefully you don't have more because that feature hasn't been released yet)! From then on, you just play 1-3 normal games of tic tac toe (depending, of course, upon if you win or lose), until a champion is crowned at the end! Don't tell anyone, but if you pay us $50 (literally enter "$50" as a move), player 1 will instantly win! Perhaps just maybe don't enter the cheat code when you're player 2 (the lower seed).
 
-### Resources/ References:
+Last but not least, no matter what if you kill the client process at any time during a game and the socket closes, it counts as an immediate forfeit!!
 
-list here(CHANGE THIS!!!!!)
+### Resources/ References:
+Systems website (konstantinnovation.github.io), W3Schools and GeeksforGeeks to help debug some small errors with understanding the parameters of functions.

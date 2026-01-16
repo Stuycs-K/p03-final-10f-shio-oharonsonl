@@ -26,4 +26,4 @@ Worked on fixing char to int conversions, there is more to be done on the server
 Worked on issues with the amount of bytes and blocking using select as well as diagnosing many problems
 
 ### 2026-01-15 - Finishing touches
-Added while loops to the move reception to catch any out of index or non-integer inputs and tell the user to try another move so that it didn't create massive problems down the line, updated readmes with instructions and also updated makefile slightly to add easy access to a different IP address. Also had a slight merge conflict scare, but it was fixed in the end.
+Added while loops to the move reception to catch any out of index or non-integer inputs and tell the user to try another move so that it didn't create massive problems down the line, updated readmes with instructions and also updated makefile slightly to add easy access to a different IP address. Also had a slight merge conflict scare, but it was fixed in the end. Finally, added a feature so that if someone kills their client process mid-game, it will end the game as a forfeit. 
