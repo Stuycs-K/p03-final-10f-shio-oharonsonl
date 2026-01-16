@@ -236,8 +236,6 @@ void subserver_logic(int client_socket, char *id) {
     sleep(1);
   }
 
-  print_game_data(games[game_index]);
-
   waitsem(game_semas[game_index]);
   decsem(game_semas[game_index]);
 
@@ -418,9 +416,6 @@ void subserver_logic(int client_socket, char *id) {
 
     sleep(1);
   }
-
-  printf("FINAL MATCH GAME DATA:\n");
-  print_game_data(games[game_index]);
 
   waitsem(game_semas[game_index]);
   decsem(game_semas[game_index]);

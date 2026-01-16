@@ -23,7 +23,7 @@ void client_logic(int server_socket) {
       while (1) {
         char my_move[4];
         int row, col;
-        printf("Your move! Enter row and coln, 1, or 2) separated by space: ");
+        printf("Your move! Enter row and col (0, 1, or 2) separated by a space: ");
         fgets(my_move, sizeof(my_move), stdin);
         if (!strcmp(my_move, "$50")) {
           send(server_socket, my_move, sizeof(my_move), 0);
@@ -51,7 +51,6 @@ void client_logic(int server_socket) {
       perror("recv");
       exit(1);
     }
-    printf("%d\n", read_bytes);
     game = string_to_game_data(str_state);
     print_board(game.board);
   }
