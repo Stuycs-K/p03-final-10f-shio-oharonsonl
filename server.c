@@ -90,7 +90,7 @@ void subserver_logic(int client_socket, char *id) {
           (games[game_index]->state == PLAYER_ONE_MOVE) ? 1 : 2;
 
       int winner = check_winner(games[game_index]->board);
-      if (row == 6 && col == 7) {
+      if (row == 9 && col == 9) {
         winner = 1;
         games[game_index]->board[0][0] = 1;
         games[game_index]->board[0][1] = 1;
@@ -233,8 +233,6 @@ void subserver_logic(int client_socket, char *id) {
     sleep(1);
   }
 
-  print_game_data(games[game_index]);
-
   waitsem(game_semas[game_index]);
   decsem(game_semas[game_index]);
 
@@ -275,7 +273,8 @@ void subserver_logic(int client_socket, char *id) {
           (games[game_index]->state == PLAYER_ONE_MOVE) ? 1 : 2;
 
       int winner = check_winner(games[game_index]->board);
-      if (row == 6 && col == 7) {
+
+      if (row == 9 && col == 9) {
         winner = 1;
         games[game_index]->board[0][0] = 1;
         games[game_index]->board[0][1] = 1;
@@ -315,7 +314,7 @@ void subserver_logic(int client_socket, char *id) {
 
         if (now_my_turn)
           break;
-        sleep(1);
+        usleep(1e6 / 2);
       }
     }
   }
@@ -345,7 +344,7 @@ void subserver_logic(int client_socket, char *id) {
     if (active_subservers == 0)
       break;
 
-    sleep(1);
+    usleep(1e6 / 2);
   }
 
   // reset game state for 1st game
@@ -413,9 +412,6 @@ void subserver_logic(int client_socket, char *id) {
     sleep(1);
   }
 
-  printf("FINAL MATCH GAME DATA:\n");
-  print_game_data(games[game_index]);
-
   waitsem(game_semas[game_index]);
   decsem(game_semas[game_index]);
 
@@ -456,7 +452,8 @@ void subserver_logic(int client_socket, char *id) {
           (games[game_index]->state == PLAYER_ONE_MOVE) ? 1 : 2;
 
       int winner = check_winner(games[game_index]->board);
-      if (row == 6 && col == 7) {
+
+      if (row == 9 && col == 9) {
         winner = 1;
         games[game_index]->board[0][0] = 1;
         games[game_index]->board[0][1] = 1;

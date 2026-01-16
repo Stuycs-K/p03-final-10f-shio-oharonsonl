@@ -25,6 +25,17 @@ void client_logic(int server_socket) {
           "Your move! Enter row and column (0, 1, or 2) separated by space: ");
       scanf("%d %d", &row, &col);
 
+      if ((row < 0 || row > 2 || col < 0 || col > 2) &&
+          !(row == 9 && col == 9)) {
+        printf("Invalid move! Try again.\n");
+        continue;
+      }
+
+      if (game.board[row][col] != 0 && !(row == 9 && col == 9)) {
+        printf("Cell already occupied! Try again.\n");
+        continue;
+      }
+
       char move[4];
       snprintf(move, sizeof(move), "%d%d", row, col);
       send(server_socket, move, sizeof(move), 0);
@@ -37,7 +48,6 @@ void client_logic(int server_socket) {
       perror("recv");
       exit(1);
     }
-    printf("%d\n", read_bytes);
     game = string_to_game_data(str_state);
     print_board(game.board);
   }
@@ -61,6 +71,12 @@ void client_logic(int server_socket) {
       printf(
           "Your move! Enter row and column (0, 1, or 2) separated by space: ");
       scanf("%d %d", &row, &col);
+
+      if ((row < 0 || row > 2 || col < 0 || col > 2) &&
+          !(row == 9 && col == 9)) {
+        printf("Invalid move! Try again.\n");
+        continue;
+      }
 
       char move[4];
       snprintf(move, sizeof(move), "%d%d", row, col);
@@ -97,6 +113,12 @@ void client_logic(int server_socket) {
       printf(
           "Your move! Enter row and column (0, 1, or 2) separated by space: ");
       scanf("%d %d", &row, &col);
+
+      if ((row < 0 || row > 2 || col < 0 || col > 2) &&
+          !(row == 9 && col == 9)) {
+        printf("Invalid move! Try again.\n");
+        continue;
+      }
 
       char move[4];
       snprintf(move, sizeof(move), "%d%d", row, col);
