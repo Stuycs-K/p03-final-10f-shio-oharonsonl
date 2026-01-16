@@ -92,7 +92,7 @@ void client_logic(int server_socket) {
             else{
               printf("Invalid move, try again!\n");
             }
-          } else {
+          }} else {
       printf("Waiting for opponent's move...\n");
     }
 
@@ -141,7 +141,7 @@ void client_logic(int server_socket) {
             else{
               printf("Invalid move, try again!\n");
             }
-          }else {
+          }}else {
       printf("Waiting for opponent's move...\n");
     }
 

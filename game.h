@@ -1,3 +1,5 @@
+#include <string.h>
+
 #ifndef GAME_H
 #define GAME_H
 
