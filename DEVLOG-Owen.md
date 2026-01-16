@@ -67,7 +67,13 @@ with main branch now.
 
 ### 2026-01-15
 
-Extrapolated brackets qualifiers work from yesterday and made semifinals and finals brackets. Tested + debugged +
-fixed conflicts and merged with main.
-
+Extrapolated brackets qualifiers work from yesterday and made semifinals and finals brackets. Tested, debugged some wierd syncrhonization issues, and merged it in with main and Louis's work. Started writing the README.md for final submission.
 (2 hours)
+
+### 2025-01-16
+
+Made tournament brackets more consistently synchronized by upping the delay in
+sleeps while looping (oh boy did that take a while to figure out!). Filmed my part for video presentation/demonstration, and
+finished up writing documentation for project for submission.
+
+(3 hours)
