@@ -10,7 +10,7 @@
    unsigned short *array;
    struct seminfo *__buf;
  };
- #endif
+#endif
 
 void decsem(int sema);
 void incsem(int sema);
