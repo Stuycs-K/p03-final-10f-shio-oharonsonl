@@ -14,13 +14,13 @@ At it's core, a forking server and shared memory addresses are used as a proxy t
 
 ### Instructions:
 
-##### Server Setup & Comnmands:
+#### Server Setup & Comnmands:
 
 Generally, to start the server, simply run a `make server-run` and the server will automatically compile and run. It will listen for clients until 8 are connected, and then start the tournament.
 
 If you wish to only compile the server, then just run a `make server-compile`.
 
-##### Client Setup & Commands:
+#### Client Setup & Commands:
 
 Like the server, to start the client, simply run a `make client-run` and the client will automatically compile and run. The client will be blocked from doing anything until the server has 8 clients connected.
 
@@ -28,7 +28,7 @@ To only compile the client (without running), do `make client-compile`
 
 For clients and servers on different IP addresses, you'll have to compile the client and then run `./client {IP_ADDRESS}`.
 
-##### How does the user interact with this program?
+#### How does the user interact with this program?
 
 Well, there are a few ways!
 
