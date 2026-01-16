@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
+#include <string.h>
 
 void client_logic(int server_socket) {
   char id;
@@ -20,14 +21,29 @@ void client_logic(int server_socket) {
   while (game.state != P1_WIN && game.state != P2_WIN) {
     if ((game.state == PLAYER_ONE_MOVE && game.player1 == id) ||
         (game.state == PLAYER_TWO_MOVE && game.player2 == id)) {
-      int row, col;
-      printf(
-          "Your move! Enter row and column (0, 1, or 2) separated by space: ");
-      scanf("%d %d", &row, &col);
+          while(1){
+            char my_move[4];
+            int row, col;
+            printf("Your move! Enter row and column (0, 1, or 2) separated by space: ");
+            fgets(my_move, sizeof(my_move), stdin);
+            if(!strcmp(my_move, "$50")){
+              send(server_socket, my_move, sizeof(my_move), 0);
+              break;
+            }
+            row = my_move[0] - '0';
+            col = my_move[1] - '0';
+            //scanf("%d %d", &row, &col);
 
-      char move[4];
-      snprintf(move, sizeof(move), "%d%d", row, col);
-      send(server_socket, move, sizeof(move), 0);
+            if(game.board[col][row] == 0 && col > 0 && col < 2 && row > 0 && row < 2){
+              char move[4];
+              snprintf(move, sizeof(move), "%d%d", row, col);
+              send(server_socket, move, sizeof(move), 0);
+              break;
+            }
+            else{
+              printf("Invalid move, try again!\n");
+            }
+          }
     } else {
       printf("Waiting for opponent's move...\n");
     }
@@ -57,15 +73,31 @@ void client_logic(int server_socket) {
   while (game.state != P1_WIN && game.state != P2_WIN) {
     if ((game.state == PLAYER_ONE_MOVE && game.player1 == id) ||
         (game.state == PLAYER_TWO_MOVE && game.player2 == id)) {
-      int row, col;
-      printf(
-          "Your move! Enter row and column (0, 1, or 2) separated by space: ");
-      scanf("%d %d", &row, &col);
+          while(1){
+            char my_move[4];
+            int row, col;
+            printf("Your move! Enter row and column (0, 1, or 2) separated by space: ");
+            fgets(my_move, sizeof(my_move), stdin);
+            if(!strcmp(my_move, "$50")){
+              send(server_socket, my_move, sizeof(my_move), 0);
+              break;
+            }
+            row = my_move[0] - '0';
+            col = my_move[1] - '0';
+            //scanf("%d %d", &row, &col);
 
-      char move[4];
-      snprintf(move, sizeof(move), "%d%d", row, col);
-      send(server_socket, move, sizeof(move), 0);
-    } else {
+            if(game.board[col][row] == 0 && col > 0 && col < 2 && row > 0 && row < 2){
+              char move[4];
+              snprintf(move, sizeof(move), "%d%d", row, col);
+              send(server_socket, move, sizeof(move), 0);
+              break;
+            }
+            else{
+              printf("Invalid move, try again!\n");
+            }
+          }
+    }
+    else {
       printf("Waiting for opponent's move...\n");
     }
 
