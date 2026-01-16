@@ -76,7 +76,7 @@ void client_logic(int server_socket) {
           while(1){
             char my_move[4];
             int row, col;
-            printf("Your move! Enter row and column (0, 1, or 2) separated by space: ");
+            printf("Your move! Enter row and coln, 1, or 2) separated by space: ");
             fgets(my_move, sizeof(my_move), stdin);
             if(!strcmp(my_move, "$50")){
               send(server_socket, my_move, sizeof(my_move), 0);
