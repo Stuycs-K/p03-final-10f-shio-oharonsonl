@@ -18,7 +18,11 @@ At it's core, a forking server and shared memory addresses are used as a proxy t
 
 #### Server Setup & Comnmands:
 
-Generally, to start the server, simply run a `make server-run` and the server will automatically compile and run. It will listen for clients until 8 are connected, and then start the tournament.
+Generally, to start the server, simply run a `make server-run` and the server
+will automatically compile and run. It will listen for clients until 8 are
+connected, and then start the tournament. It should also be noted that this
+command also runs `killall server` and `killall client` before running, to
+ensure connections.
 
 If you wish to only compile the server, then just run a `make server-compile`.
 
@@ -36,9 +40,18 @@ Well, there are a few ways!
 
 First, if you are weird (or testing functionality) and want to play a bunch of tic tac toe games against yourself, we recommend that you use tmux so that you can run the 8 clients necessary, since all 8 clients must be connected for games to start. Tmux usage allows you to not open 9 windows on your machine, but may limit scrolling potential.
 
-Second, if you are more normal and want to play with friends, you can have one person set up the server and share its IP address and port (provided the port is set up to allow outside connections), then all 8 friends can connect (hopefully you don't have more because that feature hasn't been released yet)! From then on, you just play 1-3 normal games of tic tac toe (depending, of course, upon if you win or lose), until a champion is crowned at the end! Don't tell anyone, but if you pay us $50 (literally enter "$50" as a move), player 1 will instantly win! Perhaps just maybe don't enter the cheat code when you're player 2 (the lower seed).
+Second, if you are more normal and want to play with friends, you can have one person set up the server and share its IP address and port (provided the port is set up to allow outside connections), then all 8 friends can connect (hopefully you don't have more because that feature hasn't been released yet)! From then on, you just play 1-3 normal games of tic tac toe (depending, of course, upon if you win or lose), until a champion is crowned at the end! Don't tell anyone, but if you enter "9 9", player 1 will instantly win! Perhaps just maybe don't enter the cheat code when you're player 2 (the lower seed).
 
 ### Resources/ References:
 
 https://beej.us/guide/bgnet/html/
+
 https://konstantinnovation.github.io/systems.html
+
+### Bugs:
+
+Occasionally (usually), the server requires two startups (cntrl+c then run
+again, cntrl+c then run again) before it starts recieving connections
+from the client. We're not quite sure why this happens, or why restarting it
+fixes it, but suspect that it's an issue with persistent shared memory
+addresses or semaphores.
