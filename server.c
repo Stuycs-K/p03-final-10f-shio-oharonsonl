@@ -82,7 +82,7 @@ void subserver_logic(int client_socket, char *id) {
 
 
       int row = move[0] - '0';
-      int col = move[1] - '0';
+      int col = move[2] - '0';
 
       waitsem(game_semas[game_index]);
       decsem(game_semas[game_index]);
@@ -269,7 +269,7 @@ void subserver_logic(int client_socket, char *id) {
 
 
       int row = move[0] - '0';
-      int col = move[1] - '0';
+      int col = move[2] - '0';
 
       waitsem(game_semas[game_index]);
       decsem(game_semas[game_index]);
@@ -451,7 +451,7 @@ void subserver_logic(int client_socket, char *id) {
       }
 
       int row = move[0] - '0';
-      int col = move[1] - '0';
+      int col = move[2] - '0';
 
       waitsem(game_semas[game_index]);
       decsem(game_semas[game_index]);
