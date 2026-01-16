@@ -31,7 +31,7 @@ void client_logic(int server_socket) {
               break;
             }
             row = my_move[0] - '0';
-            col = my_move[1] - '0';
+            col = my_move[2] - '0';
             //scanf("%d %d", &row, &col);
 
             if(game.board[col][row] == 0 && col > 0 && col < 2 && row > 0 && row < 2){
@@ -83,7 +83,7 @@ void client_logic(int server_socket) {
               break;
             }
             row = my_move[0] - '0';
-            col = my_move[1] - '0';
+            col = my_move[2] - '0';
             //scanf("%d %d", &row, &col);
 
             if(game.board[col][row] == 0 && col > 0 && col < 2 && row > 0 && row < 2){
@@ -135,7 +135,7 @@ void client_logic(int server_socket) {
               break;
             }
             row = my_move[0] - '0';
-            col = my_move[1] - '0';
+            col = my_move[2] - '0';
             //scanf("%d %d", &row, &col);
 
             if(game.board[col][row] == 0 && col > 0 && col < 2 && row > 0 && row < 2){
