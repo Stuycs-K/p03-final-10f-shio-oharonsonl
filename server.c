@@ -502,6 +502,7 @@ void subserver_logic(int client_socket, char *id) {
   }
 
   for (int i = 0; i < 4; i++) {
+    shmdt(games[i]);
     semctl(game_semas[i], IPC_RMID, 0);
     shmctl(game_ids[i], IPC_RMID, 0);
   }
