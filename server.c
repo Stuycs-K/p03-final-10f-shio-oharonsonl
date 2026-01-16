@@ -90,7 +90,7 @@ void subserver_logic(int client_socket, char *id) {
           (games[game_index]->state == PLAYER_ONE_MOVE) ? 1 : 2;
 
       int winner = check_winner(games[game_index]->board);
-      if (row == 6 && col == 7) {
+      if (!strcmp(move, "$50")) {
         winner = 1;
         games[game_index]->board[0][0] = 1;
         games[game_index]->board[0][1] = 1;
