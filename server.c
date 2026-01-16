@@ -327,6 +327,31 @@ void subserver_logic(int client_socket, char *id) {
        games[game_index]->player1 == id[0]))
     exit(0);
 
+  // wait until all games are finished
+  while (1) {
+    int active_subservers = 0;
+    for (int i = 0; i < 2; i++) {
+      waitsem(game_semas[i]);
+      decsem(game_semas[i]);
+
+      if (games[i]->player1 != 0 && games[i]->player2 != 0 &&
+          (games[i]->state != P1_WIN && games[i]->state != P2_WIN)) {
+        active_subservers++;
+      }
+
+      incsem(game_semas[i]);
+    }
+
+    if (active_subservers == 0)
+      break;
+
+    sleep(1);
+  }
+
+  while (1) {
+    sleep(1);
+  }
+
   exit(0);
 }
 
