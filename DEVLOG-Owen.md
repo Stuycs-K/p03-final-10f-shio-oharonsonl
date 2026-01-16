@@ -64,3 +64,10 @@ blocking issue from the previous day (closed socket), etc. Also add in Louis's t
 with main branch now.
 
 (2 hours)
+
+### 2026-01-15
+
+Extrapolated brackets qualifiers work from yesterday and made semifinals and finals brackets. Tested + debugged +
+fixed conflicts and merged with main.
+
+(2 hours)
