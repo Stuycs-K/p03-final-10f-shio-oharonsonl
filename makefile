@@ -4,7 +4,7 @@ server-run: server
 	@killall client > /dev/null 2>&1 || true
 	@./server
 client-run: client
-	@./client
+	@./client $(ARGS)
 server-compile server: server.o networking.o sema.o game.o
 	@gcc -o server server.o networking.o sema.o game.o
 client-compile client: client.o networking.o sema.o game.o
