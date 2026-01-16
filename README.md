@@ -4,6 +4,8 @@
 
 ### OH!... —WHEN?
 
+## [Video](https://drive.google.com/drive/folders/1I9-iHmU-HjgLX_5UfRc2BKjRhqcureSE?usp=sharing)
+
 Owen Shi & Louis Oh-Aronson
 
 ### Project Description:
